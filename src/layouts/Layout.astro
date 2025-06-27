@@ -1,6 +1,7 @@
 ---
 import ThemeToggle from '../components/ThemeToggle.astro';
 import { getPersonalInfo, getSocialLinks } from '../lib/supabase';
+import '../styles/glassmorphism.css';
 
 export const prerender = false; // 确保服务器端渲染
 
@@ -29,12 +30,8 @@ const socialLinks = await getSocialLinks();
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- 预加载关键资源 -->
-    <link rel="preload" href="/src/styles/glassmorphism.css" as="style" />
-
-    <!-- 图标和样式 -->
+    <!-- 图标 -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="stylesheet" href="/src/styles/glassmorphism.css" />
 
     <!-- SEO和性能优化 -->
     <meta name="robots" content="index, follow" />

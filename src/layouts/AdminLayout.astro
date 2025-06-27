@@ -1,5 +1,6 @@
 ---
 import AdminAuth from '../components/AdminAuth.astro';
+import '../styles/glassmorphism.css';
 
 export interface Props {
   title: string;
@@ -16,7 +17,7 @@ const { title, description = "Admin Dashboard" } = Astro.props;
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="stylesheet" href="/src/styles/glassmorphism.css" />
+
     <title>{title} | Admin</title>
   </head>
   <body>
