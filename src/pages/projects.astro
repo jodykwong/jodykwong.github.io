@@ -2,30 +2,32 @@
 import Layout from '../layouts/Layout.astro';
 import GlassCard from '../components/GlassCard.astro';
 import GlassButton from '../components/GlassButton.astro';
+import { getProjects } from '../lib/supabase';
 
-const projects = [
-  {
-    title: "My SaaS Product",
-    description: "A comprehensive boilerplate for building SaaS applications with modern technologies.",
-    url: "#",
-    status: "Active",
-    tech: ["React", "Node.js", "PostgreSQL"]
-  },
-  {
-    title: "My Cool App",
-    description: "An innovative solution for solving everyday problems with elegant design.",
-    url: "#",
-    status: "Active",
-    tech: ["Vue.js", "Python", "MongoDB"]
-  },
-  {
-    title: "Open Source Library",
-    description: "A popular open-source library used by thousands of developers worldwide.",
-    url: "#",
-    status: "Maintained",
-    tech: ["TypeScript", "Jest", "GitHub Actions"]
-  }
-];
+export const prerender = false; // 确保动态渲染
+
+// 从 Supabase 获取项目数据
+const projects = await getProjects();
+
+// 状态映射函数
+function getStatusDisplay(status: string) {
+  const statusMap = {
+    'active': 'Active',
+    'maintained': 'Maintained',
+    'archived': 'Archived'
+  };
+  return statusMap[status as keyof typeof statusMap] || status;
+}
+
+// 状态样式函数
+function getStatusStyle(status: string) {
+  const styleMap = {
+    'active': 'background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2);',
+    'maintained': 'background: rgba(59, 130, 246, 0.1); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.2);',
+    'archived': 'background: rgba(107, 114, 128, 0.1); color: #6b7280; border: 1px solid rgba(107, 114, 128, 0.2);'
+  };
+  return styleMap[status as keyof typeof styleMap] || styleMap.active;
+}
 ---
 
 <Layout title="Projects | Your Name">
@@ -42,20 +44,25 @@ const projects = [
     </GlassCard>
 
     <!-- 项目网格 -->
-    <div class="grid gap-6 md:grid-cols-2">
-      {projects.map((project, index) => (
+    {projects.length > 0 ? (
+      <div class="grid gap-6 md:grid-cols-2">
+        {projects.map((project, index) => (
         <GlassCard class="p-6 slide-up" style={`animation-delay: ${index * 100}ms;`}>
           <div class="flex items-start justify-between mb-4">
             <h2 class="text-xl font-semibold">
-              <a href={project.url} class="text-primary hover:text-blue-600 transition-colors">
-                {project.title}
-              </a>
+              {project.url ? (
+                <a href={project.url} class="text-primary hover:text-blue-600 transition-colors">
+                  {project.title}
+                </a>
+              ) : (
+                <span style="color: var(--text-primary);">{project.title}</span>
+              )}
             </h2>
             <span
               class="px-3 py-1 text-xs font-medium rounded-full"
-              style="background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2);"
+              style={getStatusStyle(project.status)}
             >
-              {project.status}
+              {getStatusDisplay(project.status)}
             </span>
           </div>
 
@@ -64,7 +71,7 @@ const projects = [
           </p>
 
           <div class="flex flex-wrap gap-2 mb-4">
-            {project.tech.map((tech) => (
+            {project.technologies.map((tech) => (
               <span
                 class="px-2 py-1 text-xs rounded"
                 style="background: var(--bg-tertiary); color: var(--text-tertiary); border: 1px solid var(--border-light);"
@@ -75,16 +82,32 @@ const projects = [
           </div>
 
           <div class="flex gap-2">
-            <GlassButton variant="primary" size="sm" href={project.url}>
-              View Project
-            </GlassButton>
-            <GlassButton variant="secondary" size="sm" href="#">
-              Learn More
-            </GlassButton>
+            {project.url && (
+              <GlassButton variant="primary" size="sm" href={project.url}>
+                View Project
+              </GlassButton>
+            )}
+            {project.github_url && (
+              <GlassButton variant="secondary" size="sm" href={project.github_url}>
+                GitHub
+              </GlassButton>
+            )}
           </div>
         </GlassCard>
-      ))}
-    </div>
+        ))}
+      </div>
+    ) : (
+      <!-- 空状态 -->
+      <GlassCard class="p-8 text-center">
+        <div class="text-6xl mb-4">🚧</div>
+        <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
+          No Projects Yet
+        </h2>
+        <p style="color: var(--text-secondary); line-height: 1.6;">
+          Projects are being added soon. Check back later to see what I'm working on!
+        </p>
+      </GlassCard>
+    )}
 
     <!-- 合作邀请 -->
     <GlassCard class="p-8 mt-8 text-center slide-up" style="animation-delay: 300ms;">
