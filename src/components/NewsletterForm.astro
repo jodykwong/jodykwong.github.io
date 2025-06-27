@@ -1,0 +1,81 @@
+---
+// Newsletter subscription form component
+---
+
+<form id="newsletter-form" class="flex gap-3">
+  <input 
+    type="email" 
+    id="email-input"
+    placeholder="Enter your email" 
+    required
+    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+  />
+  <button 
+    type="submit" 
+    id="submit-button"
+    class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <span id="button-text">Subscribe</span>
+    <span id="loading-text" class="hidden">Subscribing...</span>
+  </button>
+</form>
+
+<div id="success-message" class="hidden mt-4 p-4 bg-green-100 text-green-700 rounded-lg">
+  Thanks for subscribing! You'll receive updates about new posts and projects.
+</div>
+
+<div id="error-message" class="hidden mt-4 p-4 bg-red-100 text-red-700 rounded-lg">
+  <span id="error-text">Something went wrong. Please try again.</span>
+</div>
+
+<script>
+  // Newsletter form functionality
+  const form = document.getElementById('newsletter-form') as HTMLFormElement;
+  const emailInput = document.getElementById('email-input') as HTMLInputElement;
+  const submitButton = document.getElementById('submit-button') as HTMLButtonElement;
+  const buttonText = document.getElementById('button-text') as HTMLSpanElement;
+  const loadingText = document.getElementById('loading-text') as HTMLSpanElement;
+  const successMessage = document.getElementById('success-message') as HTMLDivElement;
+  const errorMessage = document.getElementById('error-message') as HTMLDivElement;
+  const errorText = document.getElementById('error-text') as HTMLSpanElement;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = emailInput.value.trim();
+    if (!email) return;
+
+    // Show loading state
+    submitButton.disabled = true;
+    buttonText.classList.add('hidden');
+    loadingText.classList.remove('hidden');
+    
+    // Hide previous messages
+    successMessage.classList.add('hidden');
+    errorMessage.classList.add('hidden');
+
+    try {
+      // In a real implementation, this would call your Supabase function
+      // For now, we'll simulate the API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Simulate success (you would replace this with actual Supabase call)
+      const success = Math.random() > 0.2; // 80% success rate for demo
+      
+      if (success) {
+        successMessage.classList.remove('hidden');
+        emailInput.value = '';
+      } else {
+        throw new Error('Subscription failed');
+      }
+    } catch (error) {
+      errorMessage.classList.remove('hidden');
+      errorText.textContent = 'Something went wrong. Please try again.';
+    } finally {
+      // Reset button state
+      submitButton.disabled = false;
+      buttonText.classList.remove('hidden');
+      loadingText.classList.add('hidden');
+    }
+  });
+</script>

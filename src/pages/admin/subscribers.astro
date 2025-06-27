@@ -1,0 +1,263 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Newsletter Subscribers">
+  <div class="space-y-6">
+    <!-- Header with Export Button -->
+    <div class="flex justify-between items-center">
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900">Newsletter Subscribers</h2>
+        <p class="text-gray-600">Manage your email subscribers</p>
+      </div>
+      <div class="flex space-x-3">
+        <button id="export-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+          Export CSV
+        </button>
+        <div class="text-sm text-gray-600 flex items-center">
+          Total: <span id="total-count" class="font-semibold ml-1">-</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Search by email..." 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+        </div>
+        <div>
+          <select 
+            id="status-filter" 
+            class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="all">All Subscribers</option>
+            <option value="active">Active Only</option>
+            <option value="inactive">Inactive Only</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subscribers Table -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Email
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Subscribed Date
+              </th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody id="subscribers-tbody" class="bg-white divide-y divide-gray-200">
+            <tr>
+              <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                Loading subscribers...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="flex items-center justify-between bg-white px-6 py-3 rounded-lg shadow">
+      <div class="text-sm text-gray-700">
+        Showing <span id="showing-from">0</span> to <span id="showing-to">0</span> of <span id="showing-total">0</span> results
+      </div>
+      <div class="flex space-x-2">
+        <button id="prev-btn" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          Previous
+        </button>
+        <button id="next-btn" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { getAllSubscribers, deleteSubscriber } from '../../lib/supabase';
+
+    let allSubscribers = [];
+    let filteredSubscribers = [];
+    let currentPage = 1;
+    const itemsPerPage = 20;
+
+    // DOM elements
+    const searchInput = document.getElementById('search-input');
+    const statusFilter = document.getElementById('status-filter');
+    const subscribersTbody = document.getElementById('subscribers-tbody');
+    const totalCount = document.getElementById('total-count');
+    const exportBtn = document.getElementById('export-btn');
+    
+    const showingFrom = document.getElementById('showing-from');
+    const showingTo = document.getElementById('showing-to');
+    const showingTotal = document.getElementById('showing-total');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    // Load subscribers
+    async function loadSubscribers() {
+      try {
+        allSubscribers = await getAllSubscribers();
+        applyFilters();
+      } catch (error) {
+        console.error('Failed to load subscribers:', error);
+        subscribersTbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Failed to load subscribers</td></tr>';
+      }
+    }
+
+    // Apply search and filter
+    function applyFilters() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const statusValue = statusFilter.value;
+
+      filteredSubscribers = allSubscribers.filter(subscriber => {
+        const matchesSearch = subscriber.email.toLowerCase().includes(searchTerm);
+        const matchesStatus = statusValue === 'all' || 
+          (statusValue === 'active' && subscriber.active) ||
+          (statusValue === 'inactive' && !subscriber.active);
+        
+        return matchesSearch && matchesStatus;
+      });
+
+      currentPage = 1;
+      renderSubscribers();
+      updatePagination();
+    }
+
+    // Render subscribers table
+    function renderSubscribers() {
+      totalCount.textContent = filteredSubscribers.length.toString();
+
+      if (filteredSubscribers.length === 0) {
+        subscribersTbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No subscribers found</td></tr>';
+        return;
+      }
+
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = Math.min(startIndex + itemsPerPage, filteredSubscribers.length);
+      const pageSubscribers = filteredSubscribers.slice(startIndex, endIndex);
+
+      subscribersTbody.innerHTML = pageSubscribers.map(subscriber => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium text-gray-900">${subscriber.email}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+              subscriber.active 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+            }">
+              ${subscriber.active ? 'Active' : 'Inactive'}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            ${new Date(subscriber.subscribed_at).toLocaleDateString()}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <button 
+              onclick="deleteSubscriberConfirm('${subscriber.id}', '${subscriber.email}')" 
+              class="text-red-600 hover:text-red-900"
+            >
+              Delete
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Update pagination
+    function updatePagination() {
+      const totalPages = Math.ceil(filteredSubscribers.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = Math.min(startIndex + itemsPerPage, filteredSubscribers.length);
+
+      showingFrom.textContent = filteredSubscribers.length > 0 ? (startIndex + 1).toString() : '0';
+      showingTo.textContent = endIndex.toString();
+      showingTotal.textContent = filteredSubscribers.length.toString();
+
+      prevBtn.disabled = currentPage <= 1;
+      nextBtn.disabled = currentPage >= totalPages;
+    }
+
+    // Export to CSV
+    function exportToCSV() {
+      if (filteredSubscribers.length === 0) {
+        alert('No subscribers to export');
+        return;
+      }
+
+      const csvContent = [
+        'Email,Status,Subscribed Date',
+        ...filteredSubscribers.map(sub => 
+          `"${sub.email}","${sub.active ? 'Active' : 'Inactive'}","${new Date(sub.subscribed_at).toISOString()}"`
+        )
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `subscribers_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Event listeners
+    searchInput?.addEventListener('input', applyFilters);
+    statusFilter?.addEventListener('change', applyFilters);
+    exportBtn?.addEventListener('click', exportToCSV);
+
+    prevBtn?.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderSubscribers();
+        updatePagination();
+      }
+    });
+
+    nextBtn?.addEventListener('click', () => {
+      const totalPages = Math.ceil(filteredSubscribers.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderSubscribers();
+        updatePagination();
+      }
+    });
+
+    // Global function for delete confirmation
+    window.deleteSubscriberConfirm = async (id, email) => {
+      if (confirm(`Are you sure you want to delete subscriber "${email}"?`)) {
+        const result = await deleteSubscriber(id);
+        if (result.success) {
+          await loadSubscribers();
+        } else {
+          alert('Error deleting subscriber: ' + result.error);
+        }
+      }
+    };
+
+    // Load subscribers on page load
+    loadSubscribers();
+  </script>
+</AdminLayout>

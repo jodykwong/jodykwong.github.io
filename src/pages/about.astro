@@ -1,0 +1,211 @@
+---
+import Layout from '../layouts/Layout.astro';
+import GlassCard from '../components/GlassCard.astro';
+import GlassButton from '../components/GlassButton.astro';
+import { getAllProfileContent, getPersonalInfo, getAllSocialLinks } from '../lib/supabase';
+
+export const prerender = false;
+
+// 获取技能数据
+const profileContentArray = await getAllProfileContent();
+const personalInfo = await getPersonalInfo();
+const socialLinks = await getAllSocialLinks();
+
+// 将数组转换为对象格式，便于访问
+const profileContent: Record<string, string> = {};
+profileContentArray.forEach((item: any) => {
+  profileContent[item.section] = item.content;
+});
+
+// 处理技能数据
+const skills = {
+  frontend: profileContent.skills_frontend || 'React, Vue.js, Astro, TypeScript, JavaScript, Tailwind CSS, Next.js, Nuxt.js',
+  backend: profileContent.skills_backend || 'Node.js, Python, PostgreSQL, MongoDB, FastAPI, REST APIs',
+  devops: profileContent.skills_devops || 'Docker, Kubernetes, AWS, Google Cloud, GitHub Actions, CI/CD, Monitoring & Analytics',
+  other: profileContent.skills_other || 'Product Management, Team Leadership, System Architecture, Technical Writing'
+};
+
+// 将技能字符串转换为数组
+const formatSkills = (skillString: string): string[] => {
+  return skillString.split(',').map((skill: string) => skill.trim()).filter((skill: string) => skill.length > 0);
+};
+---
+
+<Layout title="About | Your Name">
+  <div class="max-w-4xl mx-auto">
+    <!-- 页面标题 -->
+    <GlassCard class="p-8 mb-8 text-center fade-in">
+      <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
+        👋 About Me
+      </h1>
+      <p class="text-xl" style="color: var(--text-secondary);">
+        I'm a full-stack developer and entrepreneur passionate about building products that solve real problems.
+      </p>
+    </GlassCard>
+
+    <!-- 背景介绍 -->
+    <GlassCard class="p-6 mb-6 slide-up">
+      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
+        🚀 Background
+      </h2>
+      <div style="color: var(--text-secondary); line-height: 1.7;">
+        <p class="mb-4">
+          I started my career as a software developer over a decade ago, working with various technologies
+          and learning the ins and outs of building scalable web applications. Over the years, I've had
+          the opportunity to work with startups, established companies, and everything in between.
+        </p>
+
+        <p class="mb-4">
+          In 2015, I joined Amazing Company as a senior developer and eventually became their CTO.
+          During my time there, I led a team of talented engineers and helped build their flagship product
+          from the ground up. It was an incredible learning experience that taught me not just about
+          technology, but about leadership, product development, and building sustainable businesses.
+        </p>
+      </div>
+    </GlassCard>
+
+    <!-- 当前专注 -->
+    <GlassCard class="p-6 mb-6 slide-up" style="animation-delay: 100ms;">
+      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
+        🎯 Current Focus
+      </h2>
+      <div style="color: var(--text-secondary); line-height: 1.7;">
+        <p class="mb-4">
+          These days, I'm focused on building my own products and helping other entrepreneurs bring their
+          ideas to life. My main project is a SaaS boilerplate that helps developers launch their products
+          faster by providing a solid foundation with authentication, payments, and all the other features
+          every SaaS needs.
+        </p>
+
+        <p class="mb-4">
+          I'm also passionate about sharing what I've learned through writing and speaking. You can find
+          my thoughts on software development, entrepreneurship, and product building throughout this site.
+        </p>
+      </div>
+    </GlassCard>
+
+    <!-- 技术技能 -->
+    <GlassCard class="p-6 mb-6 slide-up" style="animation-delay: 200ms;">
+      <h2 class="text-2xl font-semibold mb-6" style="color: var(--text-primary);">
+        💻 Technical Skills
+      </h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-subtle p-4 rounded-xl">
+          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">Frontend</h3>
+          <ul class="space-y-2" style="color: var(--text-secondary);">
+            {formatSkills(skills.frontend).map((skill: string) => (
+              <li>• {skill}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="glass-subtle p-4 rounded-xl">
+          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">Backend</h3>
+          <ul class="space-y-2" style="color: var(--text-secondary);">
+            {formatSkills(skills.backend).map((skill: string) => (
+              <li>• {skill}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="glass-subtle p-4 rounded-xl">
+          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">DevOps & Tools</h3>
+          <ul class="space-y-2" style="color: var(--text-secondary);">
+            {formatSkills(skills.devops).map((skill: string) => (
+              <li>• {skill}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="glass-subtle p-4 rounded-xl">
+          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">Other</h3>
+          <ul class="space-y-2" style="color: var(--text-secondary);">
+            {formatSkills(skills.other).map((skill: string) => (
+              <li>• {skill}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </GlassCard>
+
+    <!-- 个人信息 -->
+    <GlassCard class="p-6 mb-6 slide-up" style="animation-delay: 300ms;">
+      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
+        🌟 Personal
+      </h2>
+      <div style="color: var(--text-secondary); line-height: 1.7;">
+        <p class="mb-4">
+          When I'm not coding or writing, you can find me hiking, reading, or experimenting with new
+          technologies. I'm based in [Your City] and love the local tech community here. I'm always
+          up for a coffee chat about technology, startups, or anything interesting.
+        </p>
+
+        <p class="mb-4">
+          I believe in the power of technology to solve real problems and make people's lives better.
+          Whether it's through the products I build, the teams I lead, or the content I create,
+          my goal is always to have a positive impact.
+        </p>
+      </div>
+    </GlassCard>
+
+    <!-- 联系方式 -->
+    <GlassCard class="p-8 text-center slide-up" style="animation-delay: 400ms;">
+      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
+        🤝 Let's Connect
+      </h2>
+      <p class="mb-6" style="color: var(--text-secondary); line-height: 1.6;">
+        I'm always interested in meeting new people and hearing about interesting projects.
+        Whether you want to collaborate, need advice, or just want to chat about technology,
+        feel free to reach out!
+      </p>
+
+      <div class="flex flex-wrap justify-center gap-4">
+        {socialLinks.filter(link => link.is_enabled).map(link => {
+          // 确保 email 链接有正确的 mailto: 前缀
+          let href = link.url || '#';
+          if (link.platform === 'email' && href && !href.startsWith('mailto:')) {
+            href = `mailto:${href}`;
+          }
+
+          return (
+            <GlassButton
+              variant={link.platform === 'email' ? 'primary' : 'secondary'}
+              size={link.platform === 'email' ? 'lg' : 'md'}
+              href={href}
+              class="inline-flex items-center cursor-pointer hover:scale-105 transition-transform duration-200"
+              title={link.display_name ?? undefined}
+            >
+              {link.platform === 'email' && (
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                </svg>
+              )}
+              {link.platform === 'x' && (
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+                </svg>
+              )}
+              {link.platform === 'github' && (
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"></path>
+                </svg>
+              )}
+              {link.platform === 'linkedin' && (
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.298v15.403C1 18.418 1.595 19 2.328 19h15.34c.734 0 1.332-.582 1.332-1.299V2.298C19 1.581 18.402 1 17.668 1z" clip-rule="evenodd"></path>
+                </svg>
+              )}
+              {/* 修复重复显示问题：只有 email 显示文本，其他平台只显示图标 */}
+              {link.platform === 'email' ? 'Email me' : (link.platform === 'github' ? 'GitHub' : '')}
+            </GlassButton>
+          );
+        })}
+
+        <GlassButton variant="secondary" size="md" href="/projects">
+          View Projects
+        </GlassButton>
+      </div>
+    </GlassCard>
+  </div>
+</Layout>

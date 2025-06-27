@@ -1,0 +1,691 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import GlassCard from '../../components/GlassCard.astro';
+import GlassButton from '../../components/GlassButton.astro';
+---
+
+<AdminLayout title="Profile Management">
+  <div class="space-y-6">
+    <!-- Header -->
+    <GlassCard class="p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-semibold" style="color: var(--text-primary);">Profile Management</h2>
+          <p style="color: var(--text-secondary);">Update your personal information and about page content</p>
+        </div>
+        <button id="setup-storage-btn" class="btn btn-secondary btn-sm">
+          Setup Storage
+        </button>
+      </div>
+    </GlassCard>
+
+    <!-- Personal Information Section -->
+    <GlassCard class="p-6">
+      <div class="mb-6">
+        <h3 class="text-lg font-medium" style="color: var(--text-primary);">Personal Information</h3>
+        <p class="text-sm mt-1" style="color: var(--text-secondary);">Basic information displayed on your homepage</p>
+      </div>
+
+      <form id="personal-info-form" class="space-y-6">
+        <!-- Avatar Upload -->
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Avatar</label>
+          <div class="flex items-center space-x-6">
+            <div class="flex-shrink-0">
+              <img
+                id="avatar-preview"
+                src="/images/avatar.jpg"
+                alt="Avatar preview"
+                class="w-20 h-20 rounded-full object-cover"
+                style="border: 2px solid var(--border-light);"
+              />
+            </div>
+            <div class="flex-1">
+              <input
+                type="file"
+                id="avatar-input"
+                accept="image/*"
+                class="hidden"
+              />
+              <div class="flex gap-3">
+                <button
+                  type="button"
+                  id="upload-avatar-btn"
+                  class="btn btn-secondary btn-sm"
+                >
+                  Upload New Avatar
+                </button>
+                <button
+                  type="button"
+                  id="remove-avatar-btn"
+                  class="btn btn-secondary btn-sm"
+                  style="color: #ef4444;"
+                >
+                  Remove
+                </button>
+              </div>
+              <p class="text-xs mt-2" style="color: var(--text-tertiary);">
+                JPG, PNG or GIF. Max size 2MB.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Name -->
+        <div>
+          <label for="name" class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="input"
+            placeholder="Your Name"
+          />
+        </div>
+
+        <!-- Title -->
+        <div>
+          <label for="title" class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Title</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            class="input"
+            placeholder="Full-Stack Developer, Maker of Products, and Solopreneur"
+          />
+        </div>
+
+        <!-- Bio -->
+        <div>
+          <label for="bio" class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">Bio</label>
+          <textarea
+            id="bio"
+            name="bio"
+            rows="3"
+            class="input"
+            placeholder="I'm a software developer and entrepreneur..."
+          ></textarea>
+        </div>
+
+        <div class="flex justify-end">
+          <button type="submit" class="btn btn-primary btn-md">
+            Update Personal Info
+          </button>
+        </div>
+      </form>
+    </GlassCard>
+
+    <!-- Social Media Links -->
+    <GlassCard class="p-6">
+      <div class="mb-6">
+        <h3 class="text-lg font-medium" style="color: var(--text-primary);">Social Media Links</h3>
+        <p class="text-sm mt-1" style="color: var(--text-secondary);">Configure your social media links displayed in the footer</p>
+      </div>
+
+      <div id="social-links-container" class="space-y-4">
+        <!-- Social links will be loaded here -->
+      </div>
+    </GlassCard>
+
+    <!-- Profile Content Sections -->
+    <div class="space-y-6">
+      <!-- Current Focus Section -->
+      <GlassCard class="p-6">
+        <div class="mb-4">
+          <h3 class="text-lg font-medium" style="color: var(--text-primary);">Current Focus</h3>
+          <p class="text-sm mt-1" style="color: var(--text-secondary);">What you're working on now (displayed on homepage)</p>
+        </div>
+        <form class="profile-form" data-section="current_focus">
+          <textarea
+            name="content"
+            rows="3"
+            class="input"
+            placeholder="These days I mostly work on..."
+          ></textarea>
+          <div class="mt-4 flex justify-end">
+            <button type="submit" class="btn btn-primary btn-md">
+              Update Current Focus
+            </button>
+          </div>
+        </form>
+      </GlassCard>
+
+      <!-- Writing & Sharing Section -->
+      <GlassCard class="p-6">
+        <div class="mb-4">
+          <h3 class="text-lg font-medium" style="color: var(--text-primary);">Writing & Sharing</h3>
+          <p class="text-sm mt-1" style="color: var(--text-secondary);">Your writing and content sharing description</p>
+        </div>
+        <form class="profile-form" data-section="writing_sharing">
+          <textarea
+            name="content"
+            rows="3"
+            class="input"
+            placeholder="This site originated during a six-month sabbatical..."
+          ></textarea>
+          <div class="mt-4 flex justify-end">
+            <button type="submit" class="btn btn-primary btn-md">
+              Update Writing & Sharing
+            </button>
+          </div>
+        </form>
+      </GlassCard>
+
+      <!-- Experience Section -->
+      <GlassCard class="p-6">
+        <div class="mb-4">
+          <h3 class="text-lg font-medium" style="color: var(--text-primary);">Experience</h3>
+          <p class="text-sm mt-1" style="color: var(--text-secondary);">Your professional experience summary</p>
+        </div>
+        <form class="profile-form" data-section="experience">
+          <textarea
+            name="content"
+            rows="3"
+            class="input"
+            placeholder="From 2015-2023 I served as CTO..."
+          ></textarea>
+          <div class="mt-4 flex justify-end">
+            <button type="submit" class="btn btn-primary btn-md">
+              Update Experience
+            </button>
+          </div>
+        </form>
+      </GlassCard>
+
+      <!-- Background Section -->
+      <GlassCard class="p-6">
+        <div class="mb-4">
+          <h3 class="text-lg font-medium" style="color: var(--text-primary);">Background</h3>
+          <p class="text-sm mt-1" style="color: var(--text-secondary);">Your professional background and experience (for About page)</p>
+        </div>
+        <form class="profile-form" data-section="background">
+          <textarea
+            name="content"
+            rows="6"
+            class="input"
+            placeholder="I started my career as a software developer..."
+          ></textarea>
+          <div class="mt-4 flex justify-end">
+            <button type="submit" class="btn btn-primary btn-md">
+              Update Background
+            </button>
+          </div>
+        </form>
+      </GlassCard>
+
+      <!-- Skills Sections -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Frontend Skills -->
+        <GlassCard class="p-6">
+          <div class="mb-4">
+            <h3 class="text-lg font-medium" style="color: var(--text-primary);">Frontend Skills</h3>
+          </div>
+          <form class="profile-form" data-section="skills_frontend">
+            <textarea
+              name="content"
+              rows="3"
+              class="input"
+              placeholder="React, Vue.js, TypeScript..."
+            ></textarea>
+            <div class="mt-4 flex justify-end">
+              <button type="submit" class="btn btn-primary btn-sm">
+                Update
+              </button>
+            </div>
+          </form>
+        </GlassCard>
+
+        <!-- Backend Skills -->
+        <GlassCard class="p-6">
+          <div class="mb-4">
+            <h3 class="text-lg font-medium" style="color: var(--text-primary);">Backend Skills</h3>
+          </div>
+          <form class="profile-form" data-section="skills_backend">
+            <textarea
+              name="content"
+              rows="3"
+              class="input"
+              placeholder="Node.js, Python, PostgreSQL..."
+            ></textarea>
+            <div class="mt-4 flex justify-end">
+              <button type="submit" class="btn btn-primary btn-sm">
+                Update
+              </button>
+            </div>
+          </form>
+        </GlassCard>
+
+        <!-- DevOps Skills -->
+        <GlassCard class="p-6">
+          <div class="mb-4">
+            <h3 class="text-lg font-medium" style="color: var(--text-primary);">DevOps & Tools</h3>
+          </div>
+          <form class="profile-form" data-section="skills_devops">
+            <textarea
+              name="content"
+              rows="3"
+              class="input"
+              placeholder="Docker, AWS, CI/CD..."
+            ></textarea>
+            <div class="mt-4 flex justify-end">
+              <button type="submit" class="btn btn-primary btn-sm">
+                Update
+              </button>
+            </div>
+          </form>
+        </GlassCard>
+
+        <!-- Other Skills -->
+        <GlassCard class="p-6">
+          <div class="mb-4">
+            <h3 class="text-lg font-medium" style="color: var(--text-primary);">Other Skills</h3>
+          </div>
+          <form class="profile-form" data-section="skills_other">
+            <textarea
+              name="content"
+              rows="3"
+              class="input"
+              placeholder="Product Management, Team Leadership..."
+            ></textarea>
+            <div class="mt-4 flex justify-end">
+              <button type="submit" class="btn btn-primary btn-sm">
+                Update
+              </button>
+            </div>
+          </form>
+        </GlassCard>
+      </div>
+
+      <!-- Personal Section -->
+      <GlassCard class="p-6">
+        <div class="mb-4">
+          <h3 class="text-lg font-medium" style="color: var(--text-primary);">Personal</h3>
+          <p class="text-sm mt-1" style="color: var(--text-secondary);">Personal interests and information</p>
+        </div>
+        <form class="profile-form" data-section="personal">
+          <textarea
+            name="content"
+            rows="4"
+            class="input"
+            placeholder="When I'm not coding or writing..."
+          ></textarea>
+          <div class="mt-4 flex justify-end">
+            <button type="submit" class="btn btn-primary btn-md">
+              Update Personal
+            </button>
+          </div>
+        </form>
+      </GlassCard>
+    </div>
+
+    <!-- Save All Button -->
+    <GlassCard class="p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-medium" style="color: var(--text-primary);">Bulk Actions</h3>
+          <p class="mt-1" style="color: var(--text-secondary);">Apply changes to your public profile</p>
+        </div>
+        <div class="flex space-x-3">
+          <button id="preview-btn" class="btn btn-secondary btn-md">
+            Preview Changes
+          </button>
+          <button id="publish-btn" class="btn btn-primary btn-md">
+            Publish All Changes
+          </button>
+        </div>
+      </div>
+    </GlassCard>
+  </div>
+
+  <script>
+    import {
+      getAllProfileContent,
+      upsertProfileContent,
+      getPersonalInfo,
+      upsertPersonalInfo,
+      uploadAvatar,
+      deleteAvatar,
+      getAllSocialLinks,
+      updateSocialLink
+    } from '../../lib/supabase';
+
+    let profileContent = {};
+    let personalInfo = {};
+    let currentAvatarPath = null;
+    let socialLinks = [];
+
+    // Load profile content and personal info
+    async function loadProfileContent() {
+      try {
+        // Load profile content
+        const content = await getAllProfileContent();
+        profileContent = {};
+
+        content.forEach(item => {
+          profileContent[item.section] = item.content;
+        });
+
+        // Populate profile content forms
+        document.querySelectorAll('.profile-form').forEach(form => {
+          const section = form.dataset.section;
+          const textarea = form.querySelector('textarea[name="content"]');
+          if (textarea && profileContent[section]) {
+            textarea.value = profileContent[section];
+          }
+        });
+
+        // Load personal info
+        const info = await getPersonalInfo();
+        if (info) {
+          personalInfo = info;
+          currentAvatarPath = info.avatar_url;
+
+          // Populate personal info form
+          document.getElementById('name').value = info.name || '';
+          document.getElementById('title').value = info.title || '';
+          document.getElementById('bio').value = info.bio || '';
+
+          if (info.avatar_url) {
+            document.getElementById('avatar-preview').src = info.avatar_url;
+          }
+        }
+
+        // Load social links
+        const links = await getAllSocialLinks();
+        socialLinks = links;
+        renderSocialLinks();
+
+      } catch (error) {
+        console.error('Failed to load profile content:', error);
+        alert('Failed to load profile content');
+      }
+    }
+
+    // Handle avatar upload
+    document.getElementById('upload-avatar-btn')?.addEventListener('click', () => {
+      document.getElementById('avatar-input').click();
+    });
+
+    document.getElementById('avatar-input')?.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Validate file
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) { // 2MB
+        alert('File size must be less than 2MB');
+        return;
+      }
+
+      const button = document.getElementById('upload-avatar-btn');
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Uploading...';
+
+      try {
+        // Delete old avatar if exists
+        if (currentAvatarPath && currentAvatarPath !== '/images/avatar.jpg') {
+          await deleteAvatar(currentAvatarPath.replace('/storage/v1/object/public/images/', ''));
+        }
+
+        // Upload new avatar
+        const result = await uploadAvatar(file);
+
+        if (result.success) {
+          currentAvatarPath = result.data.url;
+          document.getElementById('avatar-preview').src = result.data.url;
+          button.textContent = 'Uploaded!';
+          setTimeout(() => {
+            button.textContent = originalText;
+          }, 2000);
+        } else {
+          alert('Error uploading avatar: ' + result.error);
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        alert('An unexpected error occurred');
+      } finally {
+        button.disabled = false;
+        if (button.textContent === 'Uploading...') {
+          button.textContent = originalText;
+        }
+      }
+    });
+
+    // Handle avatar removal
+    document.getElementById('remove-avatar-btn')?.addEventListener('click', async () => {
+      if (!currentAvatarPath || currentAvatarPath === '/images/avatar.jpg') {
+        alert('No custom avatar to remove');
+        return;
+      }
+
+      if (!confirm('Are you sure you want to remove your avatar?')) {
+        return;
+      }
+
+      try {
+        await deleteAvatar(currentAvatarPath.replace('/storage/v1/object/public/images/', ''));
+        currentAvatarPath = '/images/avatar.jpg';
+        document.getElementById('avatar-preview').src = '/images/avatar.jpg';
+        alert('Avatar removed successfully');
+      } catch (error) {
+        console.error('Remove error:', error);
+        alert('An unexpected error occurred');
+      }
+    });
+
+    // Handle personal info form submission
+    document.getElementById('personal-info-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const button = e.target.querySelector('button[type="submit"]');
+      const originalText = button.textContent;
+
+      button.disabled = true;
+      button.textContent = 'Updating...';
+
+      try {
+        const result = await upsertPersonalInfo({
+          name: formData.get('name'),
+          title: formData.get('title'),
+          bio: formData.get('bio'),
+          avatar_url: currentAvatarPath
+        });
+
+        if (result.success) {
+          personalInfo = result.data;
+          button.textContent = 'Updated!';
+          setTimeout(() => {
+            button.textContent = originalText;
+          }, 2000);
+        } else {
+          alert('Error updating personal info: ' + result.error);
+        }
+      } catch (error) {
+        console.error('Update error:', error);
+        alert('An unexpected error occurred');
+      } finally {
+        button.disabled = false;
+        if (button.textContent === 'Updating...') {
+          button.textContent = originalText;
+        }
+      }
+    });
+
+    // Handle profile content form submissions
+    document.querySelectorAll('.profile-form').forEach(form => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const section = form.dataset.section;
+        const textarea = form.querySelector('textarea[name="content"]');
+        const button = form.querySelector('button[type="submit"]');
+        const content = textarea.value.trim();
+
+        if (!content) {
+          alert('Content cannot be empty');
+          return;
+        }
+
+        // Show loading state
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = 'Updating...';
+
+        try {
+          const result = await upsertProfileContent({
+            section,
+            content
+          });
+
+          if (result.success) {
+            profileContent[section] = content;
+            button.textContent = 'Updated!';
+            setTimeout(() => {
+              button.textContent = originalText;
+            }, 2000);
+          } else {
+            alert('Error updating content: ' + result.error);
+          }
+        } catch (error) {
+          console.error('Update error:', error);
+          alert('An unexpected error occurred');
+        } finally {
+          button.disabled = false;
+          if (button.textContent === 'Updating...') {
+            button.textContent = originalText;
+          }
+        }
+      });
+    });
+
+    // Preview changes
+    document.getElementById('preview-btn')?.addEventListener('click', () => {
+      window.open('/', '_blank');
+    });
+
+    // Publish all changes (just a confirmation since changes are already saved)
+    document.getElementById('publish-btn')?.addEventListener('click', () => {
+      alert('All changes have been published and are now live on your website!');
+    });
+
+    // Setup storage button
+    document.getElementById('setup-storage-btn')?.addEventListener('click', async () => {
+      const button = document.getElementById('setup-storage-btn');
+      const originalText = button.textContent;
+
+      button.disabled = true;
+      button.textContent = 'Setting up...';
+
+      try {
+        const response = await fetch('/api/setup-storage', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('存储桶设置成功！现在可以上传头像了。');
+          button.textContent = 'Setup Complete';
+        } else {
+          alert('设置失败: ' + result.error);
+          button.textContent = originalText;
+        }
+      } catch (error) {
+        console.error('Setup error:', error);
+        alert('设置过程中发生错误: ' + error.message);
+        button.textContent = originalText;
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    // Render social links
+    function renderSocialLinks() {
+      const container = document.getElementById('social-links-container');
+      if (!container) return;
+
+      container.innerHTML = socialLinks.map(link => `
+        <div class="flex items-center space-x-4 p-4 glass rounded-lg">
+          <div class="flex-shrink-0 w-16">
+            <span class="text-sm font-medium" style="color: var(--text-primary);">${link.display_name}</span>
+          </div>
+          <div class="flex-1">
+            <input
+              type="url"
+              value="${link.url || ''}"
+              placeholder="https://..."
+              class="input"
+              data-link-id="${link.id}"
+              data-field="url"
+            />
+          </div>
+          <div class="flex-shrink-0">
+            <label class="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                ${link.is_enabled ? 'checked' : ''}
+                data-link-id="${link.id}"
+                data-field="is_enabled"
+                class="rounded"
+              />
+              <span class="text-sm" style="color: var(--text-secondary);">启用</span>
+            </label>
+          </div>
+        </div>
+      `).join('');
+
+      // Add event listeners for social link updates
+      container.querySelectorAll('input').forEach(input => {
+        input.addEventListener('change', async (e) => {
+          const linkId = e.target.dataset.linkId;
+          const field = e.target.dataset.field;
+          const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+
+          try {
+            const updates = { [field]: value };
+            const result = await updateSocialLink(linkId, updates);
+
+            if (result.success) {
+              // Update local data
+              const linkIndex = socialLinks.findIndex(link => link.id === linkId);
+              if (linkIndex !== -1) {
+                socialLinks[linkIndex] = { ...socialLinks[linkIndex], ...updates };
+              }
+
+              // Show success feedback
+              e.target.style.borderColor = 'var(--success-color)';
+              setTimeout(() => {
+                e.target.style.borderColor = '';
+              }, 1000);
+            } else {
+              throw new Error(result.error);
+            }
+          } catch (error) {
+            console.error('Failed to update social link:', error);
+            alert('更新社交媒体链接失败: ' + error.message);
+
+            // Revert the change
+            if (e.target.type === 'checkbox') {
+              e.target.checked = !e.target.checked;
+            } else {
+              const originalLink = socialLinks.find(link => link.id === linkId);
+              e.target.value = originalLink?.[field] || '';
+            }
+          }
+        });
+      });
+    }
+
+    // Load content on page load
+    loadProfileContent();
+  </script>
+</AdminLayout>

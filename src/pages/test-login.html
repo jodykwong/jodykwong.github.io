@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        input, button { display: block; width: 100%; margin: 10px 0; padding: 10px; }
+        .result { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .error { background-color: #ffebee; color: #c62828; }
+        .success { background-color: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Supabase Login Test</h1>
+        
+        <form id="test-form">
+            <input type="email" id="email" placeholder="Email" value="149018385@qq.com">
+            <input type="password" id="password" placeholder="Password" value="admin123">
+            <button type="submit">Test Login</button>
+        </form>
+        
+        <div id="result" class="result" style="display: none;"></div>
+        
+        <h2>Debug Info</h2>
+        <div id="debug"></div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+        const supabaseUrl = 'https://mcfrfutbunhccwfotjfa.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZnJmdXRidW5oY2N3Zm90amZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4MzIzODYsImV4cCI6MjA2NjQwODM4Nn0.4fFg8uc_0aukJSksQlW4ljV5ZfJK-lW9HPqw3s0FTw0';
+        
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        
+        const debugDiv = document.getElementById('debug');
+        const resultDiv = document.getElementById('result');
+        
+        // Show debug info
+        debugDiv.innerHTML = `
+            <p><strong>Supabase URL:</strong> ${supabaseUrl}</p>
+            <p><strong>Anon Key:</strong> ${supabaseAnonKey.substring(0, 50)}...</p>
+        `;
+        
+        document.getElementById('test-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = 'Testing login...';
+            resultDiv.className = 'result';
+            
+            try {
+                console.log('Attempting login with:', email);
+                
+                // Step 1: Try basic auth
+                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+                
+                console.log('Auth result:', { authData, authError });
+                
+                if (authError) {
+                    throw new Error(`Auth failed: ${authError.message}`);
+                }
+                
+                // Step 2: Check if user exists in profiles
+                const { data: profileData, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', authData.user.id)
+                    .single();
+                
+                console.log('Profile result:', { profileData, profileError });
+                
+                if (profileError) {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>Profile Error</h3>
+                            <p>Auth successful but profile check failed:</p>
+                            <p>${profileError.message}</p>
+                            <p>User ID: ${authData.user.id}</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Step 3: Check admin status
+                if (!profileData.is_admin) {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>Not Admin</h3>
+                            <p>User exists but is not admin</p>
+                            <p>is_admin: ${profileData.is_admin}</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Success!
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h3>Login Successful!</h3>
+                        <p>Email: ${authData.user.email}</p>
+                        <p>User ID: ${authData.user.id}</p>
+                        <p>Is Admin: ${profileData.is_admin}</p>
+                        <p>Profile Email: ${profileData.email}</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Login test failed:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>Login Failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

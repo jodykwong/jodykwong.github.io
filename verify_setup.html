@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配置验证工具</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background-color: #f8fafc;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.pass {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .status.fail {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .status.pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .details {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .error {
+            color: #dc2626;
+        }
+        .success {
+            color: #059669;
+        }
+        .info {
+            color: #2563eb;
+        }
+        pre {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Supabase 配置验证工具</h1>
+        <p>使用你的实际 Supabase 配置进行全面验证</p>
+        
+        <div class="test-section">
+            <h3>1. 环境变量检查 <span id="env-status" class="status pending">待检查</span></h3>
+            <button onclick="checkEnvironment()">检查环境变量</button>
+            <div id="env-details" class="details" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. Supabase 连接测试 <span id="connection-status" class="status pending">待检查</span></h3>
+            <button onclick="testConnection()">测试连接</button>
+            <div id="connection-details" class="details" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. 数据库表检查 <span id="tables-status" class="status pending">待检查</span></h3>
+            <button onclick="checkTables()">检查数据表</button>
+            <div id="tables-details" class="details" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. 管理员账户验证 <span id="admin-status" class="status pending">待检查</span></h3>
+            <button onclick="checkAdminUser()">检查管理员账户</button>
+            <div id="admin-details" class="details" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>5. 登录功能测试 <span id="login-status" class="status pending">待检查</span></h3>
+            <button onclick="testLogin()">测试登录</button>
+            <div id="login-details" class="details" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>6. 完整验证 <span id="full-status" class="status pending">待检查</span></h3>
+            <button onclick="runFullTest()">运行完整测试</button>
+            <div id="full-details" class="details" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section" style="background-color: #dbeafe;">
+            <h3>📋 修复指南</h3>
+            <div id="fix-guide">
+                <p>点击上面的测试按钮来诊断问题，这里会显示相应的修复建议。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 你的 Supabase 配置
+        const SUPABASE_URL = 'https://mcfrfutbunhccwfotjfa.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZnJmdXRidW5oY2N3Zm90amZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4MzIzODYsImV4cCI6MjA2NjQwODM4Nn0.4fFg8uc_0aukJSksQlW4ljV5ZfJK-lW9HPqw3s0FTw0';
+        
+        let supabase;
+        
+        function updateStatus(elementId, status, message = '') {
+            const element = document.getElementById(elementId);
+            element.className = `status ${status}`;
+            element.textContent = status === 'pass' ? '✅ 通过' : status === 'fail' ? '❌ 失败' : '⏳ 检查中';
+            
+            if (message) {
+                const detailsId = elementId.replace('-status', '-details');
+                const detailsElement = document.getElementById(detailsId);
+                detailsElement.innerHTML = message;
+                detailsElement.style.display = 'block';
+            }
+        }
+        
+        function checkEnvironment() {
+            updateStatus('env-status', 'pending');
+            
+            let details = '<div class="info">检查环境变量配置...</div>';
+            
+            // 检查 URL 格式
+            if (!SUPABASE_URL || !SUPABASE_URL.startsWith('https://') || !SUPABASE_URL.includes('.supabase.co')) {
+                details += '<div class="error">❌ Supabase URL 格式不正确</div>';
+                updateStatus('env-status', 'fail', details);
+                return false;
+            }
+            
+            // 检查 Key 格式
+            if (!SUPABASE_ANON_KEY || !SUPABASE_ANON_KEY.startsWith('eyJ')) {
+                details += '<div class="error">❌ Supabase Anon Key 格式不正确</div>';
+                updateStatus('env-status', 'fail', details);
+                return false;
+            }
+            
+            details += '<div class="success">✅ URL 格式正确: ' + SUPABASE_URL + '</div>';
+            details += '<div class="success">✅ Anon Key 格式正确</div>';
+            details += '<div class="info">💡 环境变量配置正确</div>';
+            
+            updateStatus('env-status', 'pass', details);
+            return true;
+        }
+        
+        async function testConnection() {
+            updateStatus('connection-status', 'pending');
+            
+            let details = '<div class="info">初始化 Supabase 客户端...</div>';
+            
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                details += '<div class="success">✅ Supabase 客户端初始化成功</div>';
+                
+                // 测试基本连接
+                details += '<div class="info">测试数据库连接...</div>';
+                const { data, error } = await supabase.from('profiles').select('count').limit(1);
+                
+                if (error) {
+                    details += '<div class="error">❌ 连接失败: ' + error.message + '</div>';
+                    
+                    if (error.message.includes('relation "profiles" does not exist')) {
+                        details += '<div class="error">💡 数据表不存在，需要运行数据库迁移</div>';
+                    }
+                    
+                    updateStatus('connection-status', 'fail', details);
+                    return false;
+                } else {
+                    details += '<div class="success">✅ 数据库连接成功</div>';
+                    updateStatus('connection-status', 'pass', details);
+                    return true;
+                }
+            } catch (error) {
+                details += '<div class="error">❌ 连接测试失败: ' + error.message + '</div>';
+                updateStatus('connection-status', 'fail', details);
+                return false;
+            }
+        }
+        
+        async function checkTables() {
+            updateStatus('tables-status', 'pending');
+            
+            if (!supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+            
+            let details = '<div class="info">检查必要的数据表...</div>';
+            
+            const requiredTables = [
+                'profiles',
+                'posts', 
+                'projects',
+                'newsletter_subscribers',
+                'metrics',
+                'profile_content',
+                'admin_logs'
+            ];
+            
+            let allTablesExist = true;
+            
+            for (const table of requiredTables) {
+                try {
+                    const { data, error } = await supabase.from(table).select('*').limit(1);
+                    
+                    if (error) {
+                        details += '<div class="error">❌ 表 "' + table + '" 不存在</div>';
+                        allTablesExist = false;
+                    } else {
+                        details += '<div class="success">✅ 表 "' + table + '" 存在</div>';
+                    }
+                } catch (error) {
+                    details += '<div class="error">❌ 检查表 "' + table + '" 时出错: ' + error.message + '</div>';
+                    allTablesExist = false;
+                }
+            }
+            
+            if (!allTablesExist) {
+                details += '<div class="error">💡 需要运行数据库迁移脚本</div>';
+                updateStatus('tables-status', 'fail', details);
+                return false;
+            } else {
+                details += '<div class="success">🎉 所有必要的数据表都存在</div>';
+                updateStatus('tables-status', 'pass', details);
+                return true;
+            }
+        }
+        
+        async function checkAdminUser() {
+            updateStatus('admin-status', 'pending');
+            
+            if (!supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+            
+            let details = '<div class="info">检查管理员账户 149018385@qq.com...</div>';
+            
+            try {
+                // 检查 profiles 表中的用户
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('id, email, is_admin, created_at')
+                    .eq('email', '149018385@qq.com');
+                
+                if (error) {
+                    details += '<div class="error">❌ 查询用户失败: ' + error.message + '</div>';
+                    updateStatus('admin-status', 'fail', details);
+                    return false;
+                }
+                
+                if (data.length === 0) {
+                    details += '<div class="error">❌ 用户 149018385@qq.com 不存在</div>';
+                    details += '<div class="error">💡 需要在 Supabase Dashboard > Authentication > Users 中创建用户</div>';
+                    updateStatus('admin-status', 'fail', details);
+                    return false;
+                }
+                
+                const user = data[0];
+                details += '<div class="success">✅ 用户存在: ' + user.email + '</div>';
+                details += '<div class="info">用户 ID: ' + user.id + '</div>';
+                details += '<div class="info">创建时间: ' + new Date(user.created_at).toLocaleString() + '</div>';
+                
+                if (user.is_admin) {
+                    details += '<div class="success">✅ 用户具有管理员权限</div>';
+                    updateStatus('admin-status', 'pass', details);
+                    return true;
+                } else {
+                    details += '<div class="error">❌ 用户没有管理员权限</div>';
+                    details += '<div class="error">💡 需要运行 SQL: UPDATE profiles SET is_admin = true WHERE email = \'149018385@qq.com\';</div>';
+                    updateStatus('admin-status', 'fail', details);
+                    return false;
+                }
+                
+            } catch (error) {
+                details += '<div class="error">❌ 检查用户时出错: ' + error.message + '</div>';
+                updateStatus('admin-status', 'fail', details);
+                return false;
+            }
+        }
+        
+        async function testLogin() {
+            updateStatus('login-status', 'pending');
+            
+            if (!supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+            
+            let details = '<div class="info">测试登录 149018385@qq.com / admin123...</div>';
+            
+            try {
+                // 尝试登录
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: '149018385@qq.com',
+                    password: 'admin123'
+                });
+                
+                if (error) {
+                    details += '<div class="error">❌ 登录失败: ' + error.message + '</div>';
+                    
+                    if (error.message.includes('Invalid login credentials')) {
+                        details += '<div class="error">💡 可能原因: 密码错误或用户不存在</div>';
+                    } else if (error.message.includes('Email not confirmed')) {
+                        details += '<div class="error">💡 邮箱未确认，请在 Supabase Dashboard 中确认用户邮箱</div>';
+                    }
+                    
+                    updateStatus('login-status', 'fail', details);
+                    return false;
+                } else {
+                    details += '<div class="success">✅ 登录成功！</div>';
+                    details += '<div class="info">用户 ID: ' + data.user.id + '</div>';
+                    
+                    // 检查管理员权限
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('is_admin')
+                        .eq('id', data.user.id)
+                        .single();
+                    
+                    if (profile?.is_admin) {
+                        details += '<div class="success">✅ 管理员权限验证成功！</div>';
+                        details += '<div class="success">🎉 可以正常访问管理后台！</div>';
+                        updateStatus('login-status', 'pass', details);
+                        
+                        // 登出
+                        await supabase.auth.signOut();
+                        return true;
+                    } else {
+                        details += '<div class="error">❌ 用户登录成功但没有管理员权限</div>';
+                        updateStatus('login-status', 'fail', details);
+                        
+                        // 登出
+                        await supabase.auth.signOut();
+                        return false;
+                    }
+                }
+            } catch (error) {
+                details += '<div class="error">❌ 测试登录时出错: ' + error.message + '</div>';
+                updateStatus('login-status', 'fail', details);
+                return false;
+            }
+        }
+        
+        async function runFullTest() {
+            updateStatus('full-status', 'pending');
+            
+            let details = '<div class="info">开始完整验证...</div>';
+            
+            const results = {
+                env: false,
+                connection: false,
+                tables: false,
+                admin: false,
+                login: false
+            };
+            
+            // 依次运行所有测试
+            results.env = checkEnvironment();
+            
+            if (results.env) {
+                results.connection = await testConnection();
+                
+                if (results.connection) {
+                    results.tables = await checkTables();
+                    
+                    if (results.tables) {
+                        results.admin = await checkAdminUser();
+                        
+                        if (results.admin) {
+                            results.login = await testLogin();
+                        }
+                    }
+                }
+            }
+            
+            // 生成总结
+            const passed = Object.values(results).filter(r => r).length;
+            const total = Object.keys(results).length;
+            
+            details += '<div class="info">测试完成: ' + passed + '/' + total + ' 项通过</div>';
+            
+            if (passed === total) {
+                details += '<div class="success">🎉 所有测试通过！你现在可以使用 149018385@qq.com / admin123 登录管理后台了！</div>';
+                details += '<div class="success">访问: http://localhost:4321/admin/login</div>';
+                updateStatus('full-status', 'pass', details);
+                
+                // 更新修复指南
+                document.getElementById('fix-guide').innerHTML = '<div class="success">🎉 配置完成！现在可以正常使用管理后台了。</div>';
+            } else {
+                details += '<div class="error">❌ 部分测试失败，请查看上面的详细信息进行修复</div>';
+                updateStatus('full-status', 'fail', details);
+                
+                // 生成修复指南
+                generateFixGuide(results);
+            }
+        }
+        
+        function generateFixGuide(results) {
+            let guide = '<h4>🔧 修复步骤：</h4>';
+            
+            if (!results.env) {
+                guide += '<p>1. ❌ 环境变量配置有问题，请检查 .env 文件</p>';
+            }
+            
+            if (!results.connection) {
+                guide += '<p>2. ❌ 无法连接到 Supabase，请检查项目状态和网络连接</p>';
+            }
+            
+            if (!results.tables) {
+                guide += '<p>3. ❌ 数据表不存在，请运行数据库迁移：</p>';
+                guide += '<pre>在 Supabase SQL Editor 中运行：\n1. supabase/migrations/001_initial_schema.sql\n2. supabase/migrations/002_admin_system.sql</pre>';
+            }
+            
+            if (!results.admin) {
+                guide += '<p>4. ❌ 管理员账户问题：</p>';
+                guide += '<pre>在 Supabase Dashboard > Authentication > Users 中：\n1. 创建用户 149018385@qq.com / admin123\n2. 勾选 "Auto Confirm User"\n3. 在 SQL Editor 中运行：\n   UPDATE profiles SET is_admin = true WHERE email = \'149018385@qq.com\';</pre>';
+            }
+            
+            if (!results.login) {
+                guide += '<p>5. ❌ 登录功能有问题，请检查用户密码和权限设置</p>';
+            }
+            
+            document.getElementById('fix-guide').innerHTML = guide;
+        }
+        
+        // 页面加载时显示配置信息
+        window.addEventListener('load', () => {
+            document.getElementById('fix-guide').innerHTML = `
+                <p><strong>当前配置：</strong></p>
+                <p>Supabase URL: ${SUPABASE_URL}</p>
+                <p>管理员邮箱: 149018385@qq.com</p>
+                <p>管理员密码: admin123</p>
+                <p><strong>建议：</strong>点击"运行完整测试"进行全面验证</p>
+            `;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Posts Management">
+  <div class="space-y-6">
+    <!-- Header with Create Button -->
+    <div class="flex justify-between items-center">
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900">All Posts</h2>
+        <p class="text-gray-600">Manage your blog posts and articles</p>
+      </div>
+      <button id="create-post-btn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+        Create New Post
+      </button>
+    </div>
+
+    <!-- Posts List -->
+    <div class="bg-white shadow rounded-lg">
+      <div id="posts-container" class="divide-y divide-gray-200">
+        <div class="p-6 text-center text-gray-500">
+          Loading posts...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create/Edit Post Modal -->
+  <div id="post-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <h3 id="modal-title" class="text-lg font-medium text-gray-900">Create New Post</h3>
+          <button id="close-modal" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <form id="post-form" class="p-6 space-y-6">
+          <input type="hidden" id="post-id" />
+          
+          <div>
+            <label for="post-title" class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+            <input 
+              type="text" 
+              id="post-title" 
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="Enter post title"
+            />
+          </div>
+          
+          <div>
+            <label for="post-slug" class="block text-sm font-medium text-gray-700 mb-2">Slug</label>
+            <input 
+              type="text" 
+              id="post-slug" 
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="post-slug-url"
+            />
+            <p class="text-sm text-gray-500 mt-1">URL-friendly version of the title</p>
+          </div>
+          
+          <div>
+            <label for="post-excerpt" class="block text-sm font-medium text-gray-700 mb-2">Excerpt</label>
+            <textarea 
+              id="post-excerpt" 
+              rows="3" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="Brief description of the post"
+            ></textarea>
+          </div>
+          
+          <div>
+            <label for="post-content" class="block text-sm font-medium text-gray-700 mb-2">Content</label>
+            <textarea 
+              id="post-content" 
+              rows="15" 
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
+              placeholder="Write your post content in Markdown..."
+            ></textarea>
+            <p class="text-sm text-gray-500 mt-1">Supports Markdown formatting</p>
+          </div>
+          
+          <div class="flex items-center">
+            <input 
+              type="checkbox" 
+              id="post-published" 
+              class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+            />
+            <label for="post-published" class="ml-2 block text-sm text-gray-900">
+              Publish immediately
+            </label>
+          </div>
+          
+          <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <button type="button" id="cancel-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+              Cancel
+            </button>
+            <button type="submit" id="save-btn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
+              <span id="save-text">Save Post</span>
+              <span id="save-loading" class="hidden">Saving...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { getAllPosts, createPost, updatePost, deletePost } from '../../lib/supabase';
+
+    let posts = [];
+    let editingPostId = null;
+
+    // DOM elements
+    const postsContainer = document.getElementById('posts-container');
+    const postModal = document.getElementById('post-modal');
+    const postForm = document.getElementById('post-form');
+    const modalTitle = document.getElementById('modal-title');
+    
+    const createPostBtn = document.getElementById('create-post-btn');
+    const closeModalBtn = document.getElementById('close-modal');
+    const cancelBtn = document.getElementById('cancel-btn');
+    
+    const postIdInput = document.getElementById('post-id');
+    const titleInput = document.getElementById('post-title');
+    const slugInput = document.getElementById('post-slug');
+    const excerptInput = document.getElementById('post-excerpt');
+    const contentInput = document.getElementById('post-content');
+    const publishedInput = document.getElementById('post-published');
+    
+    const saveBtn = document.getElementById('save-btn');
+    const saveText = document.getElementById('save-text');
+    const saveLoading = document.getElementById('save-loading');
+
+    // Load posts
+    async function loadPosts() {
+      try {
+        posts = await getAllPosts();
+        renderPosts();
+      } catch (error) {
+        console.error('Failed to load posts:', error);
+        postsContainer.innerHTML = '<div class="p-6 text-center text-red-500">Failed to load posts</div>';
+      }
+    }
+
+    // Render posts list
+    function renderPosts() {
+      if (posts.length === 0) {
+        postsContainer.innerHTML = '<div class="p-6 text-center text-gray-500">No posts yet. Create your first post!</div>';
+        return;
+      }
+
+      postsContainer.innerHTML = posts.map(post => `
+        <div class="p-6 hover:bg-gray-50">
+          <div class="flex items-center justify-between">
+            <div class="flex-1">
+              <h3 class="text-lg font-medium text-gray-900">${post.title}</h3>
+              <p class="text-gray-600 mt-1">${post.excerpt || 'No excerpt'}</p>
+              <div class="flex items-center mt-2 space-x-4 text-sm text-gray-500">
+                <span class="flex items-center">
+                  <span class="w-2 h-2 rounded-full mr-2 ${post.published ? 'bg-green-400' : 'bg-yellow-400'}"></span>
+                  ${post.published ? 'Published' : 'Draft'}
+                </span>
+                <span>${new Date(post.created_at).toLocaleDateString()}</span>
+                <span>/${post.slug}</span>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="editPost('${post.id}')" class="text-blue-600 hover:text-blue-800 px-3 py-1 rounded">
+                Edit
+              </button>
+              <button onclick="deletePostConfirm('${post.id}')" class="text-red-600 hover:text-red-800 px-3 py-1 rounded">
+                Delete
+              </button>
+              ${post.published ? `<a href="/writing/${post.slug}" target="_blank" class="text-green-600 hover:text-green-800 px-3 py-1 rounded">View</a>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Auto-generate slug from title
+    titleInput?.addEventListener('input', () => {
+      if (!editingPostId) { // Only auto-generate for new posts
+        const slug = titleInput.value
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        slugInput.value = slug;
+      }
+    });
+
+    // Modal controls
+    createPostBtn?.addEventListener('click', () => openModal());
+    closeModalBtn?.addEventListener('click', () => closeModal());
+    cancelBtn?.addEventListener('click', () => closeModal());
+
+    // Form submission
+    postForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await savePost();
+    });
+
+    function openModal(post = null) {
+      editingPostId = post?.id || null;
+      modalTitle.textContent = post ? 'Edit Post' : 'Create New Post';
+      
+      if (post) {
+        postIdInput.value = post.id;
+        titleInput.value = post.title;
+        slugInput.value = post.slug;
+        excerptInput.value = post.excerpt || '';
+        contentInput.value = post.content;
+        publishedInput.checked = post.published;
+      } else {
+        postForm.reset();
+        postIdInput.value = '';
+      }
+      
+      postModal.classList.remove('hidden');
+      titleInput.focus();
+    }
+
+    function closeModal() {
+      postModal.classList.add('hidden');
+      editingPostId = null;
+    }
+
+    async function savePost() {
+      const postData = {
+        title: titleInput.value.trim(),
+        slug: slugInput.value.trim(),
+        excerpt: excerptInput.value.trim() || null,
+        content: contentInput.value.trim(),
+        published: publishedInput.checked,
+        author_id: null // Will be set by the database
+      };
+
+      // Validation
+      if (!postData.title || !postData.slug || !postData.content) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      // Show loading
+      saveBtn.disabled = true;
+      saveText.classList.add('hidden');
+      saveLoading.classList.remove('hidden');
+
+      try {
+        let result;
+        if (editingPostId) {
+          result = await updatePost(editingPostId, postData);
+        } else {
+          result = await createPost(postData);
+        }
+
+        if (result.success) {
+          closeModal();
+          await loadPosts();
+        } else {
+          alert('Error saving post: ' + result.error);
+        }
+      } catch (error) {
+        console.error('Save error:', error);
+        alert('An unexpected error occurred');
+      } finally {
+        saveBtn.disabled = false;
+        saveText.classList.remove('hidden');
+        saveLoading.classList.add('hidden');
+      }
+    }
+
+    // Global functions for inline event handlers
+    window.editPost = (id) => {
+      const post = posts.find(p => p.id === id);
+      if (post) openModal(post);
+    };
+
+    window.deletePostConfirm = async (id) => {
+      const post = posts.find(p => p.id === id);
+      if (!post) return;
+
+      if (confirm(`Are you sure you want to delete "${post.title}"?`)) {
+        const result = await deletePost(id);
+        if (result.success) {
+          await loadPosts();
+        } else {
+          alert('Error deleting post: ' + result.error);
+        }
+      }
+    };
+
+    // Load posts on page load
+    loadPosts();
+  </script>
+</AdminLayout>

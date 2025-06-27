@@ -1,0 +1,56 @@
+---
+// Admin authentication wrapper component
+import { isCurrentUserAdmin } from '../lib/supabase';
+
+// This component should be used to wrap admin pages
+// It will redirect to login if user is not authenticated or not admin
+---
+
+<div id="admin-auth-wrapper">
+  <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <p class="text-gray-600">Checking authentication...</p>
+    </div>
+  </div>
+  
+  <div id="admin-content" class="hidden">
+    <slot />
+  </div>
+</div>
+
+<script>
+  import { isCurrentUserAdmin, getCurrentUser } from '../lib/supabase';
+
+  async function checkAdminAuth() {
+    try {
+      const user = await getCurrentUser();
+      
+      if (!user) {
+        // Not logged in, redirect to admin login
+        window.location.href = '/admin/login';
+        return;
+      }
+
+      const isAdmin = await isCurrentUserAdmin();
+      
+      if (!isAdmin) {
+        // Not an admin, redirect to main site
+        alert('Access denied. Admin privileges required.');
+        window.location.href = '/';
+        return;
+      }
+
+      // User is authenticated and is admin, show content
+      document.getElementById('loading-screen')?.classList.add('hidden');
+      document.getElementById('admin-content')?.classList.remove('hidden');
+      
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      window.location.href = '/admin/login';
+    }
+  }
+
+  // Check auth when page loads
+  checkAdminAuth();
+</script>

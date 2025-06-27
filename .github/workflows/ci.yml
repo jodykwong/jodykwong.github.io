@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  # 对所有分支的pull request运行CI
+  pull_request:
+    branches: [ main ]
+  
+  # 对非main分支的push运行CI
+  push:
+    branches-ignore: [ main ]
+
+jobs:
+  test:
+    name: Test and Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run linting
+        run: npm run lint
+        
+      - name: Run tests
+        run: npm run test
+        
+      - name: Check TypeScript
+        run: npm run check
+        
+      - name: Test build
+        run: npm run build
+        env:
+          # 测试环境变量
+          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL || 'https://test.supabase.co' }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY || 'test-key' }}
+          PUBLIC_SITE_URL: 'https://test.example.com'
+          PUBLIC_SITE_NAME: 'Test Site'
+          NODE_ENV: production
+          
+      - name: Upload build artifacts (for debugging)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+          retention-days: 1

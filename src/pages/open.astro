@@ -1,0 +1,181 @@
+---
+import Layout from '../layouts/Layout.astro';
+import GlassCard from '../components/GlassCard.astro';
+import GlassButton from '../components/GlassButton.astro';
+
+// Mock data - in a real app, this would come from Supabase
+const metrics = {
+  revenue: {
+    current: 12500,
+    previous: 10200,
+    growth: 22.5
+  },
+  users: {
+    current: 1250,
+    previous: 980,
+    growth: 27.6
+  },
+  expenses: {
+    current: 3200,
+    previous: 2800,
+    growth: 14.3
+  }
+};
+
+const recentUpdates = [
+  {
+    date: "2024-01-15",
+    title: "New Feature Launch",
+    description: "Launched the advanced analytics dashboard that users have been requesting."
+  },
+  {
+    date: "2024-01-10",
+    title: "Revenue Milestone",
+    description: "Hit $12K MRR for the first time! Celebrating this important milestone."
+  },
+  {
+    date: "2024-01-05",
+    title: "Team Update",
+    description: "Brought on a part-time designer to help improve the user experience."
+  }
+];
+
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount);
+}
+
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}
+---
+
+<Layout title="Open Project Dashboard | Your Name">
+  <div class="max-w-4xl mx-auto">
+    <!-- 页面标题 -->
+    <GlassCard class="p-8 mb-8 text-center fade-in">
+      <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
+        📊 Open Project Dashboard
+      </h1>
+      <p class="text-lg" style="color: var(--text-secondary);">
+        I believe in transparency and sharing the journey of building products.
+        Here's a real-time look at the metrics and progress of my main project.
+      </p>
+    </GlassCard>
+
+    <!-- 关键指标 -->
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+      <GlassCard class="p-6 slide-up">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-medium uppercase tracking-wide" style="color: var(--text-tertiary);">Monthly Revenue</h3>
+          <div class="flex items-center" style="color: #10b981;">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l9.2-9.2M17 17V7H7"></path>
+            </svg>
+            <span class="text-sm font-medium">+{metrics.revenue.growth}%</span>
+          </div>
+        </div>
+        <div class="text-3xl font-bold" style="color: var(--text-primary);">
+          {formatCurrency(metrics.revenue.current)}
+        </div>
+        <p class="text-sm mt-1" style="color: var(--text-tertiary);">
+          vs {formatCurrency(metrics.revenue.previous)} last month
+        </p>
+      </GlassCard>
+
+      <GlassCard class="p-6 slide-up" style="animation-delay: 100ms;">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-medium uppercase tracking-wide" style="color: var(--text-tertiary);">Active Users</h3>
+          <div class="flex items-center" style="color: #10b981;">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l9.2-9.2M17 17V7H7"></path>
+            </svg>
+            <span class="text-sm font-medium">+{metrics.users.growth}%</span>
+          </div>
+        </div>
+        <div class="text-3xl font-bold" style="color: var(--text-primary);">
+          {metrics.users.current.toLocaleString()}
+        </div>
+        <p class="text-sm mt-1" style="color: var(--text-tertiary);">
+          vs {metrics.users.previous.toLocaleString()} last month
+        </p>
+      </GlassCard>
+
+      <GlassCard class="p-6 slide-up" style="animation-delay: 200ms;">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-medium uppercase tracking-wide" style="color: var(--text-tertiary);">Monthly Expenses</h3>
+          <div class="flex items-center" style="color: #ef4444;">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l9.2-9.2M17 17V7H7"></path>
+            </svg>
+            <span class="text-sm font-medium">+{metrics.expenses.growth}%</span>
+          </div>
+        </div>
+        <div class="text-3xl font-bold" style="color: var(--text-primary);">
+          {formatCurrency(metrics.expenses.current)}
+        </div>
+        <p class="text-sm mt-1" style="color: var(--text-tertiary);">
+          vs {formatCurrency(metrics.expenses.previous)} last month
+        </p>
+      </GlassCard>
+    </div>
+
+    <!-- 最近更新 -->
+    <GlassCard class="p-6 mb-8 slide-up" style="animation-delay: 300ms;">
+      <h2 class="text-2xl font-semibold mb-6" style="color: var(--text-primary);">
+        📈 Recent Updates
+      </h2>
+      <div class="space-y-6">
+        {recentUpdates.map((update) => (
+          <div class="glass-subtle p-4 rounded-lg" style="border-left: 4px solid var(--color-primary);">
+            <div class="flex items-center gap-4 mb-2">
+              <time class="text-sm" style="color: var(--text-tertiary);" datetime={update.date}>
+                {formatDate(update.date)}
+              </time>
+            </div>
+            <h3 class="font-semibold text-lg mb-2" style="color: var(--text-primary);">{update.title}</h3>
+            <p style="color: var(--text-secondary); line-height: 1.6;">{update.description}</p>
+          </div>
+        ))}
+      </div>
+    </GlassCard>
+
+    <!-- 理念说明 -->
+    <GlassCard class="p-8 slide-up" style="animation-delay: 400ms;">
+      <h2 class="text-2xl font-semibold mb-6" style="color: var(--text-primary);">
+        🌟 Why Open?
+      </h2>
+      <div class="space-y-4" style="color: var(--text-secondary); line-height: 1.7;">
+        <p>
+          I believe in building in public and sharing both the successes and failures of entrepreneurship.
+          This transparency helps other founders learn from my experiences and creates accountability for my own journey.
+        </p>
+        <p>
+          The numbers above are updated monthly and reflect the real performance of my main SaaS product.
+          I also share detailed breakdowns of what's working, what isn't, and what I'm learning along the way.
+        </p>
+        <p>
+          If you're building something yourself, I'd love to hear about it.
+          Feel free to reach out and share your own journey!
+        </p>
+      </div>
+
+      <div class="flex justify-center gap-4 mt-8">
+        <GlassButton variant="primary" size="lg" href="mailto:your@email.com">
+          Share your story
+        </GlassButton>
+        <GlassButton variant="secondary" size="lg" href="/projects">
+          View Projects
+        </GlassButton>
+      </div>
+    </GlassCard>
+  </div>
+</Layout>

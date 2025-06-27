@@ -1,0 +1,108 @@
+---
+import Layout from '../layouts/Layout.astro';
+import GlassCard from '../components/GlassCard.astro';
+import GlassButton from '../components/GlassButton.astro';
+
+const projects = [
+  {
+    title: "My SaaS Product",
+    description: "A comprehensive boilerplate for building SaaS applications with modern technologies.",
+    url: "#",
+    status: "Active",
+    tech: ["React", "Node.js", "PostgreSQL"]
+  },
+  {
+    title: "My Cool App",
+    description: "An innovative solution for solving everyday problems with elegant design.",
+    url: "#",
+    status: "Active",
+    tech: ["Vue.js", "Python", "MongoDB"]
+  },
+  {
+    title: "Open Source Library",
+    description: "A popular open-source library used by thousands of developers worldwide.",
+    url: "#",
+    status: "Maintained",
+    tech: ["TypeScript", "Jest", "GitHub Actions"]
+  }
+];
+---
+
+<Layout title="Projects | Your Name">
+  <div class="max-w-4xl mx-auto">
+    <!-- 页面标题 -->
+    <GlassCard class="p-8 mb-8 text-center fade-in">
+      <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
+        🚀 Projects
+      </h1>
+      <p class="text-lg" style="color: var(--text-secondary);">
+        Here are some of the projects I've been working on. From SaaS products to open-source libraries,
+        I enjoy building things that solve real problems.
+      </p>
+    </GlassCard>
+
+    <!-- 项目网格 -->
+    <div class="grid gap-6 md:grid-cols-2">
+      {projects.map((project, index) => (
+        <GlassCard class="p-6 slide-up" style={`animation-delay: ${index * 100}ms;`}>
+          <div class="flex items-start justify-between mb-4">
+            <h2 class="text-xl font-semibold">
+              <a href={project.url} class="text-primary hover:text-blue-600 transition-colors">
+                {project.title}
+              </a>
+            </h2>
+            <span
+              class="px-3 py-1 text-xs font-medium rounded-full"
+              style="background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2);"
+            >
+              {project.status}
+            </span>
+          </div>
+
+          <p class="mb-4" style="color: var(--text-secondary); line-height: 1.6;">
+            {project.description}
+          </p>
+
+          <div class="flex flex-wrap gap-2 mb-4">
+            {project.tech.map((tech) => (
+              <span
+                class="px-2 py-1 text-xs rounded"
+                style="background: var(--bg-tertiary); color: var(--text-tertiary); border: 1px solid var(--border-light);"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+
+          <div class="flex gap-2">
+            <GlassButton variant="primary" size="sm" href={project.url}>
+              View Project
+            </GlassButton>
+            <GlassButton variant="secondary" size="sm" href="#">
+              Learn More
+            </GlassButton>
+          </div>
+        </GlassCard>
+      ))}
+    </div>
+
+    <!-- 合作邀请 -->
+    <GlassCard class="p-8 mt-8 text-center slide-up" style="animation-delay: 300ms;">
+      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
+        💡 Want to collaborate?
+      </h2>
+      <p class="mb-6" style="color: var(--text-secondary); line-height: 1.6;">
+        I'm always interested in working on exciting projects. If you have an idea you'd like to discuss,
+        feel free to reach out!
+      </p>
+      <div class="flex justify-center gap-4">
+        <GlassButton variant="primary" size="lg" href="mailto:your@email.com">
+          Get in touch
+        </GlassButton>
+        <GlassButton variant="secondary" size="lg" href="/about">
+          About Me
+        </GlassButton>
+      </div>
+    </GlassCard>
+  </div>
+</Layout>

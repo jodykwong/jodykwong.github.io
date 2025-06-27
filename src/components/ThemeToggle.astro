@@ -1,0 +1,123 @@
+---
+// 主题切换组件
+---
+
+<button
+  class="theme-toggle"
+  aria-label="切换主题"
+  title="切换明暗主题"
+>
+  <svg
+    class="sun-icon w-5 h-5 transition-opacity duration-300"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+    />
+  </svg>
+  <svg
+    class="moon-icon w-5 h-5 transition-opacity duration-300 absolute inset-0 opacity-0"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+    />
+  </svg>
+</button>
+
+<script is:inline>
+  // 主题切换逻辑
+  (function() {
+    // 防止重复初始化
+    if (window.themeInitialized) return;
+    window.themeInitialized = true;
+
+    // 获取当前主题（已在Layout中初始化）
+    function getCurrentTheme() {
+      return document.documentElement.getAttribute('data-theme') || 'light';
+    }
+
+    function initThemeToggle() {
+      // 使用类选择器而不是ID，避免冲突
+      const themeToggles = document.querySelectorAll('.theme-toggle');
+
+      themeToggles.forEach(toggle => {
+        const sunIcon = toggle.querySelector('.sun-icon');
+        const moonIcon = toggle.querySelector('.moon-icon');
+
+        // 应用主题到图标
+        function updateIcons(theme) {
+          if (theme === 'dark') {
+            sunIcon?.classList.add('opacity-0');
+            moonIcon?.classList.remove('opacity-0');
+          } else {
+            sunIcon?.classList.remove('opacity-0');
+            moonIcon?.classList.add('opacity-0');
+          }
+        }
+
+        // 应用主题
+        function applyTheme(theme) {
+          document.documentElement.setAttribute('data-theme', theme);
+          localStorage.setItem('theme', theme);
+
+          // 更新所有切换按钮的图标
+          document.querySelectorAll('.theme-toggle').forEach(btn => {
+            const sun = btn.querySelector('.sun-icon');
+            const moon = btn.querySelector('.moon-icon');
+            if (theme === 'dark') {
+              sun?.classList.add('opacity-0');
+              moon?.classList.remove('opacity-0');
+            } else {
+              sun?.classList.remove('opacity-0');
+              moon?.classList.add('opacity-0');
+            }
+          });
+        }
+
+        // 初始化图标状态
+        updateIcons(getCurrentTheme());
+
+        // 添加点击事件
+        toggle.addEventListener('click', () => {
+          const currentTheme = document.documentElement.getAttribute('data-theme');
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          applyTheme(newTheme);
+        });
+      });
+    }
+
+    // 页面加载时初始化
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initThemeToggle);
+    } else {
+      initThemeToggle();
+    }
+  })();
+</script>
+
+<style>
+  .theme-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .moon-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>

@@ -1,0 +1,208 @@
+---
+import Layout from '../layouts/Layout.astro';
+import GlassCard from '../components/GlassCard.astro';
+import GlassButton from '../components/GlassButton.astro';
+---
+
+<Layout title="Design System | 苹果风格玻璃拟态设计系统">
+  <div class="max-w-6xl mx-auto">
+    <!-- 标题区域 -->
+    <GlassCard class="p-8 mb-8 text-center">
+      <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
+        🎨 Apple Glassmorphism Design System
+      </h1>
+      <p class="text-xl" style="color: var(--text-secondary);">
+        苹果风格玻璃拟态设计系统演示页面
+      </p>
+    </GlassCard>
+
+    <!-- 按钮组件展示 -->
+    <GlassCard class="p-6 mb-8">
+      <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">按钮组件</h2>
+      
+      <div class="space-y-6">
+        <!-- Primary 按钮 -->
+        <div>
+          <h3 class="text-lg font-semibold mb-3" style="color: var(--text-secondary);">Primary 按钮</h3>
+          <div class="flex flex-wrap gap-4">
+            <GlassButton variant="primary" size="sm">Small</GlassButton>
+            <GlassButton variant="primary" size="md">Medium</GlassButton>
+            <GlassButton variant="primary" size="lg">Large</GlassButton>
+          </div>
+        </div>
+
+        <!-- Secondary 按钮 -->
+        <div>
+          <h3 class="text-lg font-semibold mb-3" style="color: var(--text-secondary);">Secondary 按钮</h3>
+          <div class="flex flex-wrap gap-4">
+            <GlassButton variant="secondary" size="sm">Small</GlassButton>
+            <GlassButton variant="secondary" size="md">Medium</GlassButton>
+            <GlassButton variant="secondary" size="lg">Large</GlassButton>
+          </div>
+        </div>
+
+        <!-- 链接按钮 -->
+        <div>
+          <h3 class="text-lg font-semibold mb-3" style="color: var(--text-secondary);">链接按钮</h3>
+          <div class="flex flex-wrap gap-4">
+            <GlassButton variant="primary" size="md" href="/">Home Link</GlassButton>
+            <GlassButton variant="secondary" size="md" href="/projects">Projects Link</GlassButton>
+          </div>
+        </div>
+      </div>
+    </GlassCard>
+
+    <!-- 卡片组件展示 -->
+    <GlassCard class="p-6 mb-8">
+      <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">卡片组件</h2>
+      
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- 默认卡片 -->
+        <GlassCard variant="default" class="p-4">
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary);">默认卡片</h3>
+          <p style="color: var(--text-secondary);">这是一个默认样式的玻璃拟态卡片组件。</p>
+        </GlassCard>
+
+        <!-- 提升卡片 -->
+        <GlassCard variant="elevated" class="p-4">
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary);">提升卡片</h3>
+          <p style="color: var(--text-secondary);">这是一个带有提升效果的玻璃拟态卡片。</p>
+        </GlassCard>
+
+        <!-- 微妙卡片 -->
+        <GlassCard variant="subtle" class="p-4">
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary);">微妙卡片</h3>
+          <p style="color: var(--text-secondary);">这是一个微妙样式的玻璃拟态卡片。</p>
+        </GlassCard>
+      </div>
+    </GlassCard>
+
+    <!-- 表单组件展示 -->
+    <GlassCard class="p-6 mb-8">
+      <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">表单组件</h2>
+      
+      <div class="max-w-md">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">
+              姓名
+            </label>
+            <input 
+              type="text" 
+              class="input" 
+              placeholder="请输入您的姓名"
+            />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">
+              邮箱
+            </label>
+            <input 
+              type="email" 
+              class="input" 
+              placeholder="请输入您的邮箱"
+            />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">
+              消息
+            </label>
+            <textarea 
+              class="input" 
+              rows="4" 
+              placeholder="请输入您的消息"
+            ></textarea>
+          </div>
+          
+          <div class="flex gap-3">
+            <GlassButton variant="primary" size="md">提交</GlassButton>
+            <GlassButton variant="secondary" size="md">重置</GlassButton>
+          </div>
+        </div>
+      </div>
+    </GlassCard>
+
+    <!-- 颜色系统展示 -->
+    <GlassCard class="p-6 mb-8">
+      <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">颜色系统</h2>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-full mx-auto mb-2" style="background: var(--color-primary);"></div>
+          <p class="text-sm" style="color: var(--text-secondary);">Primary</p>
+        </div>
+        
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-full mx-auto mb-2" style="background: var(--color-secondary);"></div>
+          <p class="text-sm" style="color: var(--text-secondary);">Secondary</p>
+        </div>
+        
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-full mx-auto mb-2" style="background: #8b5cf6;"></div>
+          <p class="text-sm" style="color: var(--text-secondary);">Purple</p>
+        </div>
+        
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-full mx-auto mb-2" style="background: #10b981;"></div>
+          <p class="text-sm" style="color: var(--text-secondary);">Green</p>
+        </div>
+      </div>
+    </GlassCard>
+
+    <!-- 动画效果展示 -->
+    <GlassCard class="p-6 mb-8">
+      <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">动画效果</h2>
+      
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="text-center">
+          <div class="glass p-4 rounded-xl fade-in">
+            <h3 class="font-semibold mb-2" style="color: var(--text-primary);">淡入动画</h3>
+            <p class="text-sm" style="color: var(--text-secondary);">fade-in</p>
+          </div>
+        </div>
+        
+        <div class="text-center">
+          <div class="glass p-4 rounded-xl slide-up" style="animation-delay: 100ms;">
+            <h3 class="font-semibold mb-2" style="color: var(--text-primary);">上滑动画</h3>
+            <p class="text-sm" style="color: var(--text-secondary);">slide-up</p>
+          </div>
+        </div>
+        
+        <div class="text-center">
+          <div class="glass p-4 rounded-xl scale-in" style="animation-delay: 200ms;">
+            <h3 class="font-semibold mb-2" style="color: var(--text-primary);">缩放动画</h3>
+            <p class="text-sm" style="color: var(--text-secondary);">scale-in</p>
+          </div>
+        </div>
+      </div>
+    </GlassCard>
+
+    <!-- 使用说明 -->
+    <GlassCard class="p-6">
+      <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">使用说明</h2>
+      
+      <div class="prose max-w-none" style="color: var(--text-secondary);">
+        <p class="mb-4">
+          这个设计系统基于苹果的设计语言，采用玻璃拟态（Glassmorphism）效果，提供了完整的组件库和样式系统。
+        </p>
+        
+        <h3 class="text-lg font-semibold mb-3" style="color: var(--text-primary);">主要特性：</h3>
+        <ul class="list-disc list-inside space-y-2 mb-4">
+          <li>🎨 苹果风格的玻璃拟态效果</li>
+          <li>🌓 明暗主题自动切换</li>
+          <li>📱 完全响应式设计</li>
+          <li>⚡ 流畅的动画过渡</li>
+          <li>🧩 模块化组件系统</li>
+          <li>🎯 易于定制和扩展</li>
+        </ul>
+        
+        <div class="flex gap-3">
+          <GlassButton variant="primary" size="md" href="/">返回首页</GlassButton>
+          <GlassButton variant="secondary" size="md" href="/projects">查看项目</GlassButton>
+        </div>
+      </div>
+    </GlassCard>
+  </div>
+</Layout>

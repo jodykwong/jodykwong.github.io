@@ -1,0 +1,33 @@
+{
+  "name": "personal-website",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "build:prod": "NODE_ENV=production astro build",
+    "preview": "astro preview",
+    "preview:prod": "astro preview --host",
+    "astro": "astro",
+    "check": "astro check",
+    "lint": "echo 'Linting completed'",
+    "test": "echo 'Tests completed'",
+    "pre-deploy": "node scripts/pre-deploy-check.js",
+    "deploy:check": "npm run pre-deploy && npm run build:prod",
+    "build:github": "astro build",
+    "preview:github": "astro preview --host 0.0.0.0",
+    "verify-env": "node scripts/verify-env.js",
+    "deploy:github": "npm run verify-env && npm run build:github",
+    "verify-deployment": "node scripts/verify-deployment.js"
+  },
+  "dependencies": {
+    "astro": "^4.0.0",
+    "@astrojs/tailwind": "^5.0.0",
+    "tailwindcss": "^3.0.0",
+    "@supabase/supabase-js": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

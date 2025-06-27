@@ -1,0 +1,150 @@
+---
+import Layout from '../layouts/Layout.astro';
+import GlassCard from '../components/GlassCard.astro';
+import GlassButton from '../components/GlassButton.astro';
+
+const topics = [
+  {
+    title: "Web Development",
+    description: "Modern web development practices, frameworks, and tools I use daily.",
+    posts: [
+      { title: "Building Scalable React Applications", date: "2024-01-20" },
+      { title: "The Future of JavaScript Frameworks", date: "2023-12-15" },
+      { title: "CSS-in-JS vs Traditional CSS", date: "2023-11-30" }
+    ]
+  },
+  {
+    title: "Backend Development",
+    description: "Server-side development, APIs, databases, and system architecture.",
+    posts: [
+      { title: "Designing RESTful APIs That Last", date: "2024-01-10" },
+      { title: "Database Design Patterns", date: "2023-12-05" },
+      { title: "Microservices vs Monoliths", date: "2023-11-15" }
+    ]
+  },
+  {
+    title: "DevOps & Deployment",
+    description: "Deployment strategies, CI/CD, monitoring, and infrastructure management.",
+    posts: [
+      { title: "Docker in Production: Lessons Learned", date: "2024-01-05" },
+      { title: "Setting Up CI/CD with GitHub Actions", date: "2023-12-20" },
+      { title: "Monitoring and Alerting Best Practices", date: "2023-11-10" }
+    ]
+  }
+];
+
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+---
+
+<Layout title="On Software | Your Name">
+  <div class="max-w-4xl mx-auto">
+    <!-- 页面标题 -->
+    <GlassCard class="p-8 mb-8 text-center fade-in">
+      <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
+        💻 On Software
+      </h1>
+      <p class="text-lg" style="color: var(--text-secondary);">
+        Technical posts about software development, architecture decisions, and lessons learned
+        from building and maintaining software systems.
+      </p>
+    </GlassCard>
+
+    <!-- 技术主题 -->
+    <div class="space-y-8">
+      {topics.map((topic, topicIndex) => (
+        <GlassCard class="p-6 slide-up" style={`animation-delay: ${topicIndex * 100}ms;`}>
+          <section>
+            <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
+              {topic.title}
+            </h2>
+            <p class="mb-6" style="color: var(--text-secondary); line-height: 1.6;">
+              {topic.description}
+            </p>
+
+            <div class="space-y-3">
+              {topic.posts.map((post) => (
+                <div class="glass-subtle p-4 rounded-lg hover:transform hover:scale-[1.02] transition-all duration-200">
+                  <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                      <h3 class="font-medium">
+                        <a href="#" class="text-primary hover:text-blue-600 transition-colors">
+                          {post.title}
+                        </a>
+                      </h3>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <time class="text-sm" style="color: var(--text-tertiary);" datetime={post.date}>
+                        {formatDate(post.date)}
+                      </time>
+                      <GlassButton variant="secondary" size="sm" href="#">
+                        Read
+                      </GlassButton>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </GlassCard>
+      ))}
+    </div>
+
+    <!-- 技术咨询 -->
+    <GlassCard class="p-8 mt-8 slide-up" style="animation-delay: 300ms;">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
+          🚀 Technical Consulting
+        </h2>
+        <p class="mb-6" style="color: var(--text-secondary); line-height: 1.6;">
+          I offer technical consulting services for startups and established companies.
+          Whether you need help with architecture decisions, code reviews, or team mentoring,
+          I'm here to help.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 mb-8">
+        <div class="glass-subtle p-6 rounded-xl text-center">
+          <div class="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3" style="background: var(--color-primary);">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+          </div>
+          <h3 class="font-semibold mb-2" style="color: var(--text-primary);">Architecture Review</h3>
+          <p class="text-sm" style="color: var(--text-secondary);">System design and architecture consultation</p>
+        </div>
+
+        <div class="glass-subtle p-6 rounded-xl text-center">
+          <div class="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3" style="background: var(--color-primary);">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="font-semibold mb-2" style="color: var(--text-primary);">Code Review</h3>
+          <p class="text-sm" style="color: var(--text-secondary);">In-depth code quality and best practices review</p>
+        </div>
+
+        <div class="glass-subtle p-6 rounded-xl text-center">
+          <div class="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3" style="background: var(--color-primary);">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+          </div>
+          <h3 class="font-semibold mb-2" style="color: var(--text-primary);">Team Mentoring</h3>
+          <p class="text-sm" style="color: var(--text-secondary);">Developer training and team leadership guidance</p>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <GlassButton variant="primary" size="lg" href="mailto:your@email.com">
+          Get in touch about consulting
+        </GlassButton>
+      </div>
+    </GlassCard>
+  </div>
+</Layout>
