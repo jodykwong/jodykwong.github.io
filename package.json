@@ -18,7 +18,8 @@
     "build:github": "astro build",
     "preview:github": "astro preview --host 0.0.0.0",
     "verify-env": "node scripts/verify-env.js",
-    "deploy:github": "npm run verify-env && npm run build:github",
+    "deploy:github": "npm run build:github",
+    "deploy:github:full": "npm run verify-env && npm run build:github",
     "verify-deployment": "node scripts/verify-deployment.js"
   },
   "dependencies": {
