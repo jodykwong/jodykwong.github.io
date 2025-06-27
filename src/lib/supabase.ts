@@ -41,6 +41,15 @@ export interface Project {
   technologies: string[];
   created_at: string;
   updated_at: string;
+  // 版本 0.2 新增字段
+  slug?: string;
+  detailed_description?: string;
+  screenshots?: string[];
+  demo_url?: string;
+  features?: string[];
+  challenges?: string;
+  lessons_learned?: string;
+  project_timeline?: any; // JSONB 类型
 }
 
 export interface Metrics {
@@ -882,4 +891,62 @@ export async function setBlogPostCategories(postId: string, categoryIds: string[
   }
 
   return { success: true };
+}
+
+// =====================================================
+// 项目详情管理 (版本 0.2)
+// =====================================================
+
+// 根据 slug 获取项目详情
+export async function getProjectBySlug(slug: string): Promise<Project | null> {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error) {
+    console.error('Error fetching project by slug:', error);
+    return null;
+  }
+
+  return data as Project;
+}
+
+// 获取相关项目（相同技术栈）
+export async function getRelatedProjects(projectId: string, technologies: string[], limit: number = 3): Promise<Project[]> {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .neq('id', projectId)
+    .overlaps('technologies', technologies)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching related projects:', error);
+    return [];
+  }
+
+  return data as Project[];
+}
+
+// 更新项目详情
+export async function updateProjectDetails(id: string, updates: Partial<Project>) {
+  const { data, error } = await supabase
+    .from('projects')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating project details:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, data };
 }

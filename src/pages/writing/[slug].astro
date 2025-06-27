@@ -6,6 +6,12 @@ import { getBlogPostBySlug, getPublishedBlogPosts } from '../../lib/supabase';
 
 export const prerender = false; // 确保动态渲染
 
+// 为静态构建提供路径
+export async function getStaticPaths() {
+  // 在静态构建时返回空数组，运行时动态处理
+  return [];
+}
+
 // 获取文章 slug
 const { slug } = Astro.params;
 

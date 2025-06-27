@@ -50,8 +50,8 @@ function getStatusStyle(status: string) {
         <GlassCard class="p-6 slide-up" style={`animation-delay: ${index * 100}ms;`}>
           <div class="flex items-start justify-between mb-4">
             <h2 class="text-xl font-semibold">
-              {project.url ? (
-                <a href={project.url} class="text-primary hover:text-blue-600 transition-colors">
+              {project.slug ? (
+                <a href={`/projects/${project.slug}`} class="text-primary hover:text-blue-600 transition-colors">
                   {project.title}
                 </a>
               ) : (
@@ -82,9 +82,14 @@ function getStatusStyle(status: string) {
           </div>
 
           <div class="flex gap-2">
+            {project.slug && (
+              <GlassButton variant="primary" size="sm" href={`/projects/${project.slug}`}>
+                查看详情
+              </GlassButton>
+            )}
             {project.url && (
-              <GlassButton variant="primary" size="sm" href={project.url}>
-                View Project
+              <GlassButton variant="secondary" size="sm" href={project.url}>
+                访问项目
               </GlassButton>
             )}
             {project.github_url && (

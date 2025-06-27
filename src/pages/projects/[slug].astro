@@ -1,0 +1,391 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import GlassCard from '../../components/GlassCard.astro';
+import GlassButton from '../../components/GlassButton.astro';
+import { getProjectBySlug, getRelatedProjects } from '../../lib/supabase';
+
+export const prerender = false; // 确保动态渲染
+
+// 为静态构建提供路径
+export async function getStaticPaths() {
+  // 在静态构建时返回空数组，运行时动态处理
+  return [];
+}
+
+// 获取项目 slug
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/projects');
+}
+
+// 获取项目详情
+const project = await getProjectBySlug(slug);
+
+if (!project) {
+  return Astro.redirect('/projects');
+}
+
+// 获取相关项目
+const relatedProjects = await getRelatedProjects(project.id, project.technologies);
+
+// 格式化日期
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+// 获取状态样式
+const getStatusStyle = (status: string) => {
+  const styleMap = {
+    'active': 'background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2);',
+    'maintained': 'background: rgba(59, 130, 246, 0.1); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.2);',
+    'archived': 'background: rgba(107, 114, 128, 0.1); color: #6b7280; border: 1px solid rgba(107, 114, 128, 0.2);'
+  };
+  return styleMap[status as keyof typeof styleMap] || styleMap.active;
+};
+
+// 获取状态显示文本
+const getStatusDisplay = (status: string) => {
+  const statusMap = {
+    'active': '活跃开发',
+    'maintained': '维护中',
+    'archived': '已归档'
+  };
+  return statusMap[status as keyof typeof statusMap] || status;
+};
+
+// 页面标题
+const pageTitle = `${project.title} - 项目详情`;
+---
+
+<Layout title={pageTitle}>
+  <div class="max-w-6xl mx-auto px-6 py-12">
+    <!-- 返回链接 -->
+    <div class="mb-8">
+      <GlassButton variant="secondary" size="sm" href="/projects" class="inline-flex items-center">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        返回项目列表
+      </GlassButton>
+    </div>
+
+    <!-- 项目头部信息 -->
+    <header class="mb-12">
+      <GlassCard class="p-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+          <!-- 项目基本信息 -->
+          <div class="flex-1">
+            <div class="flex items-center gap-4 mb-4">
+              <h1 class="text-3xl md:text-4xl font-bold" style="color: var(--text-primary);">
+                {project.title}
+              </h1>
+              <span
+                class="px-3 py-1 text-sm font-medium rounded-full"
+                style={getStatusStyle(project.status)}
+              >
+                {getStatusDisplay(project.status)}
+              </span>
+            </div>
+
+            <p class="text-lg mb-6" style="color: var(--text-secondary); line-height: 1.6;">
+              {project.description}
+            </p>
+
+            <!-- 技术栈 -->
+            <div class="mb-6">
+              <h3 class="text-sm font-medium mb-3" style="color: var(--text-primary);">
+                技术栈
+              </h3>
+              <div class="flex flex-wrap gap-2">
+                {project.technologies.map((tech) => (
+                  <span
+                    class="px-3 py-1 text-sm rounded-full"
+                    style="background: var(--bg-tertiary); color: var(--text-tertiary); border: 1px solid var(--border-light);"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <!-- 项目链接 -->
+            <div class="flex flex-wrap gap-3">
+              {project.url && (
+                <GlassButton variant="primary" href={project.url}>
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                  访问项目
+                </GlassButton>
+              )}
+              {project.demo_url && (
+                <GlassButton variant="secondary" href={project.demo_url}>
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2-10v18a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2h8l4 4z"></path>
+                  </svg>
+                  在线演示
+                </GlassButton>
+              )}
+              {project.github_url && (
+                <GlassButton variant="secondary" href={project.github_url}>
+                  <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                  GitHub
+                </GlassButton>
+              )}
+            </div>
+          </div>
+
+          <!-- 项目元信息 -->
+          <div class="lg:w-80">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-medium mb-2" style="color: var(--text-primary);">
+                  创建时间
+                </h4>
+                <p class="text-sm" style="color: var(--text-secondary);">
+                  {formatDate(project.created_at)}
+                </p>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-medium mb-2" style="color: var(--text-primary);">
+                  最后更新
+                </h4>
+                <p class="text-sm" style="color: var(--text-secondary);">
+                  {formatDate(project.updated_at)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </GlassCard>
+    </header>
+
+    <!-- 项目截图 -->
+    {project.screenshots && project.screenshots.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">
+          项目截图
+        </h2>
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {project.screenshots.map((screenshot, index) => (
+            <div class="slide-up" style={`animation-delay: ${index * 100}ms;`}>
+              <img
+                src={screenshot}
+                alt={`${project.title} 截图 ${index + 1}`}
+                class="w-full h-48 object-cover rounded-lg shadow-lg cursor-pointer hover:scale-105 transition-transform"
+                onclick={`openImageModal('${screenshot}')`}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- 详细描述 -->
+    {project.detailed_description && (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">
+          项目详情
+        </h2>
+        <GlassCard class="p-8">
+          <div class="prose prose-lg max-w-none" style="color: var(--text-secondary); line-height: 1.8;">
+            <div set:html={project.detailed_description}></div>
+          </div>
+        </GlassCard>
+      </section>
+    )}
+
+    <!-- 功能特性 -->
+    {project.features && project.features.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">
+          核心功能
+        </h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          {project.features.map((feature, index) => (
+            <GlassCard class="p-6 slide-up" style={`animation-delay: ${index * 100}ms;`}>
+              <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-1" style="background: var(--color-primary);">
+                  <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <p style="color: var(--text-secondary);">{feature}</p>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- 开发挑战 -->
+    {project.challenges && (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">
+          开发挑战
+        </h2>
+        <GlassCard class="p-8">
+          <div class="prose prose-lg max-w-none" style="color: var(--text-secondary); line-height: 1.8;">
+            <div set:html={project.challenges}></div>
+          </div>
+        </GlassCard>
+      </section>
+    )}
+
+    <!-- 经验总结 -->
+    {project.lessons_learned && (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">
+          经验总结
+        </h2>
+        <GlassCard class="p-8">
+          <div class="prose prose-lg max-w-none" style="color: var(--text-secondary); line-height: 1.8;">
+            <div set:html={project.lessons_learned}></div>
+          </div>
+        </GlassCard>
+      </section>
+    )}
+
+    <!-- 项目时间线 -->
+    {project.project_timeline && (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">
+          开发时间线
+        </h2>
+        <GlassCard class="p-8">
+          <div class="space-y-6">
+            {Object.entries(project.project_timeline).map(([phase, details], index) => (
+              <div class="flex items-start space-x-4 slide-up" style={`animation-delay: ${index * 100}ms;`}>
+                <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style="background: var(--color-primary);">
+                  <span class="text-white text-sm font-bold">{index + 1}</span>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-semibold mb-2" style="color: var(--text-primary);">
+                    {phase}
+                  </h3>
+                  <p style="color: var(--text-secondary);">
+                    {details}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      </section>
+    )}
+
+    <!-- 相关项目 -->
+    {relatedProjects.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);">
+          相关项目
+        </h2>
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {relatedProjects.map((relatedProject, index) => (
+            <GlassCard class="p-6 slide-up" style={`animation-delay: ${index * 100}ms;`}>
+              <h3 class="text-lg font-semibold mb-3">
+                <a href={`/projects/${relatedProject.slug}`} class="text-primary hover:text-blue-600 transition-colors">
+                  {relatedProject.title}
+                </a>
+              </h3>
+              <p class="text-sm mb-4" style="color: var(--text-secondary);">
+                {relatedProject.description}
+              </p>
+              <div class="flex flex-wrap gap-1">
+                {relatedProject.technologies.slice(0, 3).map((tech) => (
+                  <span
+                    class="px-2 py-1 text-xs rounded"
+                    style="background: var(--bg-tertiary); color: var(--text-tertiary);"
+                  >
+                    {tech}
+                  </span>
+                ))}
+                {relatedProject.technologies.length > 3 && (
+                  <span class="text-xs" style="color: var(--text-tertiary);">
+                    +{relatedProject.technologies.length - 3}
+                  </span>
+                )}
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- 导航按钮 -->
+    <div class="flex justify-between items-center">
+      <GlassButton variant="secondary" href="/projects">
+        ← 返回项目列表
+      </GlassButton>
+      
+      <GlassButton variant="primary" href="/about">
+        了解更多关于我 →
+      </GlassButton>
+    </div>
+  </div>
+
+  <!-- 图片模态框 -->
+  <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center z-50" onclick="closeImageModal()">
+    <div class="max-w-4xl max-h-full p-4">
+      <img id="modal-image" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg" />
+    </div>
+  </div>
+</Layout>
+
+<script>
+// 图片模态框功能
+function openImageModal(imageSrc) {
+  const modal = document.getElementById('image-modal');
+  const modalImage = document.getElementById('modal-image');
+  modalImage.src = imageSrc;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeImageModal() {
+  const modal = document.getElementById('image-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+// 全局函数，供 HTML 调用
+window.openImageModal = openImageModal;
+window.closeImageModal = closeImageModal;
+</script>
+
+<style>
+/* 动画效果 */
+.slide-up {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideUp 0.6s ease forwards;
+}
+
+@keyframes slideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 图片悬停效果 */
+img:hover {
+  transition: transform 0.3s ease;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .prose {
+    font-size: 0.9rem;
+  }
+}
+</style>
