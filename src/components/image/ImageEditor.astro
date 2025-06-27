@@ -1,0 +1,824 @@
+---
+// ImageEditor.astro - 图片编辑组件
+export interface Props {
+  maxWidth?: number;
+  maxHeight?: number;
+  allowedFormats?: string[];
+  quality?: number;
+  onImageProcessed?: string; // 回调函数名
+}
+
+const {
+  maxWidth = 1920,
+  maxHeight = 1080,
+  allowedFormats = ['image/jpeg', 'image/png', 'image/webp'],
+  quality = 0.9,
+  onImageProcessed = 'onImageProcessed'
+} = Astro.props;
+---
+
+<div class="image-editor">
+  <!-- 文件上传区域 -->
+  <div class="upload-area" id="upload-area">
+    <input
+      type="file"
+      id="image-input"
+      accept={allowedFormats.join(',')}
+      class="hidden"
+    />
+    <div class="upload-content">
+      <div class="upload-icon">
+        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+        </svg>
+      </div>
+      <p class="text-lg font-medium mb-2" style="color: var(--text-primary);">
+        点击上传图片或拖拽到此处
+      </p>
+      <p class="text-sm" style="color: var(--text-secondary);">
+        支持 JPG、PNG、WebP 格式，最大 {Math.round(maxWidth * maxHeight / 1000000)}MP
+      </p>
+    </div>
+  </div>
+
+  <!-- 图片编辑区域 -->
+  <div class="editor-area hidden" id="editor-area">
+    <!-- 工具栏 -->
+    <div class="toolbar">
+      <div class="toolbar-section">
+        <h3 class="toolbar-title">裁剪</h3>
+        <div class="toolbar-controls">
+          <button class="tool-btn" id="crop-free" title="自由裁剪">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </button>
+          <button class="tool-btn" id="crop-square" title="正方形">1:1</button>
+          <button class="tool-btn" id="crop-16-9" title="16:9">16:9</button>
+          <button class="tool-btn" id="crop-4-3" title="4:3">4:3</button>
+        </div>
+      </div>
+
+      <div class="toolbar-section">
+        <h3 class="toolbar-title">调整</h3>
+        <div class="toolbar-controls">
+          <div class="slider-control">
+            <label for="brightness">亮度</label>
+            <input type="range" id="brightness" min="-100" max="100" value="0" />
+          </div>
+          <div class="slider-control">
+            <label for="contrast">对比度</label>
+            <input type="range" id="contrast" min="-100" max="100" value="0" />
+          </div>
+          <div class="slider-control">
+            <label for="saturation">饱和度</label>
+            <input type="range" id="saturation" min="-100" max="100" value="0" />
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar-section">
+        <h3 class="toolbar-title">滤镜</h3>
+        <div class="toolbar-controls">
+          <button class="filter-btn active" data-filter="none">原图</button>
+          <button class="filter-btn" data-filter="grayscale">黑白</button>
+          <button class="filter-btn" data-filter="sepia">复古</button>
+          <button class="filter-btn" data-filter="blur">模糊</button>
+        </div>
+      </div>
+
+      <div class="toolbar-section">
+        <h3 class="toolbar-title">输出</h3>
+        <div class="toolbar-controls">
+          <select id="output-format">
+            <option value="jpeg">JPEG</option>
+            <option value="png">PNG</option>
+            <option value="webp">WebP</option>
+          </select>
+          <div class="slider-control">
+            <label for="quality">质量</label>
+            <input type="range" id="quality-slider" min="0.1" max="1" step="0.1" value={quality} />
+            <span id="quality-value">{Math.round(quality * 100)}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 画布区域 -->
+    <div class="canvas-container">
+      <canvas id="image-canvas"></canvas>
+      <div class="crop-overlay hidden" id="crop-overlay">
+        <div class="crop-handle top-left"></div>
+        <div class="crop-handle top-right"></div>
+        <div class="crop-handle bottom-left"></div>
+        <div class="crop-handle bottom-right"></div>
+      </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="action-buttons">
+      <button class="btn btn-secondary" id="reset-btn">
+        重置
+      </button>
+      <button class="btn btn-secondary" id="cancel-btn">
+        取消
+      </button>
+      <button class="btn btn-primary" id="apply-btn">
+        应用更改
+      </button>
+    </div>
+  </div>
+
+  <!-- 预览区域 -->
+  <div class="preview-area hidden" id="preview-area">
+    <div class="preview-content">
+      <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">
+        处理结果
+      </h3>
+      <div class="preview-image-container">
+        <img id="preview-image" alt="处理后的图片" />
+      </div>
+      <div class="preview-info">
+        <div class="info-item">
+          <span class="label">尺寸:</span>
+          <span id="preview-dimensions">-</span>
+        </div>
+        <div class="info-item">
+          <span class="label">大小:</span>
+          <span id="preview-size">-</span>
+        </div>
+        <div class="info-item">
+          <span class="label">格式:</span>
+          <span id="preview-format">-</span>
+        </div>
+      </div>
+      <div class="preview-actions">
+        <button class="btn btn-secondary" id="edit-again-btn">
+          重新编辑
+        </button>
+        <button class="btn btn-primary" id="download-btn">
+          下载图片
+        </button>
+        <button class="btn btn-primary" id="use-image-btn">
+          使用此图片
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.image-editor {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* 上传区域 */
+.upload-area {
+  border: 2px dashed var(--border-light);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--bg-secondary);
+}
+
+.upload-area:hover {
+  border-color: var(--color-primary);
+  background: var(--bg-tertiary);
+}
+
+.upload-area.dragover {
+  border-color: var(--color-primary);
+  background: rgba(14, 165, 233, 0.1);
+}
+
+.upload-content {
+  pointer-events: none;
+}
+
+.upload-icon {
+  color: var(--text-tertiary);
+}
+
+/* 编辑区域 */
+.editor-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+}
+
+.toolbar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 120px;
+}
+
+.toolbar-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.toolbar-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tool-btn, .filter-btn {
+  padding: 0.5rem;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.75rem;
+}
+
+.tool-btn:hover, .filter-btn:hover {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.filter-btn.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.slider-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.slider-control label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.slider-control input[type="range"] {
+  width: 100%;
+}
+
+/* 画布区域 */
+.canvas-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+}
+
+#image-canvas {
+  max-width: 100%;
+  max-height: 600px;
+  border-radius: 4px;
+}
+
+/* 裁剪覆盖层 */
+.crop-overlay {
+  position: absolute;
+  border: 2px solid var(--color-primary);
+  background: rgba(14, 165, 233, 0.1);
+  cursor: move;
+}
+
+.crop-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  border: 1px solid white;
+  border-radius: 50%;
+}
+
+.crop-handle.top-left { top: -4px; left: -4px; cursor: nw-resize; }
+.crop-handle.top-right { top: -4px; right: -4px; cursor: ne-resize; }
+.crop-handle.bottom-left { bottom: -4px; left: -4px; cursor: sw-resize; }
+.crop-handle.bottom-right { bottom: -4px; right: -4px; cursor: se-resize; }
+
+/* 操作按钮 */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+/* 预览区域 */
+.preview-area {
+  text-align: center;
+}
+
+.preview-image-container {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+}
+
+#preview-image {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 4px;
+}
+
+.preview-info {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-item .label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.preview-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* 按钮样式 */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0284c7;
+}
+
+.btn-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-secondary);
+}
+
+/* 隐藏类 */
+.hidden {
+  display: none !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .toolbar-section {
+    min-width: auto;
+  }
+
+  .preview-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .action-buttons,
+  .preview-actions {
+    flex-direction: column;
+  }
+}
+</style>
+
+<script>
+class ImageEditor {
+  constructor() {
+    this.canvas = null;
+    this.ctx = null;
+    this.originalImage = null;
+    this.currentImage = null;
+    this.filters = {
+      brightness: 0,
+      contrast: 0,
+      saturation: 0,
+      filter: 'none'
+    };
+    this.cropData = null;
+    this.isDragging = false;
+    this.dragStart = { x: 0, y: 0 };
+
+    this.init();
+  }
+
+  init() {
+    this.setupElements();
+    this.bindEvents();
+  }
+
+  setupElements() {
+    this.uploadArea = document.getElementById('upload-area');
+    this.imageInput = document.getElementById('image-input');
+    this.editorArea = document.getElementById('editor-area');
+    this.previewArea = document.getElementById('preview-area');
+    this.canvas = document.getElementById('image-canvas');
+    this.ctx = this.canvas.getContext('2d');
+
+    // 工具栏元素
+    this.brightnessSlider = document.getElementById('brightness');
+    this.contrastSlider = document.getElementById('contrast');
+    this.saturationSlider = document.getElementById('saturation');
+    this.qualitySlider = document.getElementById('quality-slider');
+    this.qualityValue = document.getElementById('quality-value');
+    this.outputFormat = document.getElementById('output-format');
+
+    // 按钮元素
+    this.resetBtn = document.getElementById('reset-btn');
+    this.cancelBtn = document.getElementById('cancel-btn');
+    this.applyBtn = document.getElementById('apply-btn');
+    this.downloadBtn = document.getElementById('download-btn');
+    this.useImageBtn = document.getElementById('use-image-btn');
+    this.editAgainBtn = document.getElementById('edit-again-btn');
+
+    // 预览元素
+    this.previewImage = document.getElementById('preview-image');
+    this.previewDimensions = document.getElementById('preview-dimensions');
+    this.previewSize = document.getElementById('preview-size');
+    this.previewFormat = document.getElementById('preview-format');
+  }
+
+  bindEvents() {
+    // 文件上传事件
+    this.uploadArea.addEventListener('click', () => this.imageInput.click());
+    this.imageInput.addEventListener('change', (e) => this.handleFileSelect(e));
+
+    // 拖拽上传
+    this.uploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
+    this.uploadArea.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+    this.uploadArea.addEventListener('drop', (e) => this.handleDrop(e));
+
+    // 滑块事件
+    this.brightnessSlider.addEventListener('input', () => this.updateFilters());
+    this.contrastSlider.addEventListener('input', () => this.updateFilters());
+    this.saturationSlider.addEventListener('input', () => this.updateFilters());
+    this.qualitySlider.addEventListener('input', () => this.updateQualityDisplay());
+
+    // 滤镜按钮
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => this.applyFilter(e.target.dataset.filter));
+    });
+
+    // 裁剪按钮
+    document.getElementById('crop-free').addEventListener('click', () => this.enableCrop('free'));
+    document.getElementById('crop-square').addEventListener('click', () => this.enableCrop('1:1'));
+    document.getElementById('crop-16-9').addEventListener('click', () => this.enableCrop('16:9'));
+    document.getElementById('crop-4-3').addEventListener('click', () => this.enableCrop('4:3'));
+
+    // 操作按钮
+    this.resetBtn.addEventListener('click', () => this.resetImage());
+    this.cancelBtn.addEventListener('click', () => this.cancelEdit());
+    this.applyBtn.addEventListener('click', () => this.applyChanges());
+    this.downloadBtn.addEventListener('click', () => this.downloadImage());
+    this.useImageBtn.addEventListener('click', () => this.useImage());
+    this.editAgainBtn.addEventListener('click', () => this.editAgain());
+  }
+
+  handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+      this.loadImage(file);
+    }
+  }
+
+  handleDragOver(event) {
+    event.preventDefault();
+    this.uploadArea.classList.add('dragover');
+  }
+
+  handleDragLeave(event) {
+    event.preventDefault();
+    this.uploadArea.classList.remove('dragover');
+  }
+
+  handleDrop(event) {
+    event.preventDefault();
+    this.uploadArea.classList.remove('dragover');
+
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+      this.loadImage(files[0]);
+    }
+  }
+
+  loadImage(file) {
+    // 验证文件类型
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('不支持的文件格式，请选择 JPG、PNG 或 WebP 格式的图片。');
+      return;
+    }
+
+    // 验证文件大小（10MB 限制）
+    if (file.size > 10 * 1024 * 1024) {
+      alert('文件太大，请选择小于 10MB 的图片。');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        this.originalImage = img;
+        this.currentImage = img;
+        this.setupCanvas();
+        this.showEditor();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  setupCanvas() {
+    const img = this.originalImage;
+    const maxWidth = 800;
+    const maxHeight = 600;
+
+    let { width, height } = img;
+
+    // 计算适合的尺寸
+    if (width > maxWidth || height > maxHeight) {
+      const ratio = Math.min(maxWidth / width, maxHeight / height);
+      width *= ratio;
+      height *= ratio;
+    }
+
+    this.canvas.width = width;
+    this.canvas.height = height;
+
+    this.drawImage();
+  }
+
+  drawImage() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // 应用滤镜
+    this.ctx.filter = this.getFilterString();
+
+    this.ctx.drawImage(
+      this.currentImage,
+      0, 0,
+      this.canvas.width,
+      this.canvas.height
+    );
+
+    // 重置滤镜
+    this.ctx.filter = 'none';
+  }
+
+  getFilterString() {
+    const { brightness, contrast, saturation, filter } = this.filters;
+
+    let filterStr = '';
+
+    if (brightness !== 0) {
+      filterStr += `brightness(${100 + brightness}%) `;
+    }
+
+    if (contrast !== 0) {
+      filterStr += `contrast(${100 + contrast}%) `;
+    }
+
+    if (saturation !== 0) {
+      filterStr += `saturate(${100 + saturation}%) `;
+    }
+
+    switch (filter) {
+      case 'grayscale':
+        filterStr += 'grayscale(100%) ';
+        break;
+      case 'sepia':
+        filterStr += 'sepia(100%) ';
+        break;
+      case 'blur':
+        filterStr += 'blur(2px) ';
+        break;
+    }
+
+    return filterStr || 'none';
+  }
+
+  updateFilters() {
+    this.filters.brightness = parseInt(this.brightnessSlider.value);
+    this.filters.contrast = parseInt(this.contrastSlider.value);
+    this.filters.saturation = parseInt(this.saturationSlider.value);
+
+    this.drawImage();
+  }
+
+  updateQualityDisplay() {
+    const quality = Math.round(this.qualitySlider.value * 100);
+    this.qualityValue.textContent = quality + '%';
+  }
+
+  applyFilter(filterType) {
+    // 更新按钮状态
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    this.filters.filter = filterType;
+    this.drawImage();
+  }
+
+  enableCrop(aspectRatio) {
+    // 裁剪功能的实现（简化版）
+    alert('裁剪功能正在开发中...');
+  }
+
+  resetImage() {
+    this.filters = {
+      brightness: 0,
+      contrast: 0,
+      saturation: 0,
+      filter: 'none'
+    };
+
+    this.brightnessSlider.value = 0;
+    this.contrastSlider.value = 0;
+    this.saturationSlider.value = 0;
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    document.querySelector('.filter-btn[data-filter="none"]').classList.add('active');
+
+    this.currentImage = this.originalImage;
+    this.drawImage();
+  }
+
+  cancelEdit() {
+    this.showUpload();
+  }
+
+  applyChanges() {
+    // 生成最终图片
+    const format = this.outputFormat.value;
+    const quality = parseFloat(this.qualitySlider.value);
+
+    let mimeType = 'image/jpeg';
+    switch (format) {
+      case 'png':
+        mimeType = 'image/png';
+        break;
+      case 'webp':
+        mimeType = 'image/webp';
+        break;
+    }
+
+    const dataUrl = this.canvas.toDataURL(mimeType, quality);
+
+    // 显示预览
+    this.previewImage.src = dataUrl;
+    this.previewDimensions.textContent = `${this.canvas.width} × ${this.canvas.height}`;
+    this.previewFormat.textContent = format.toUpperCase();
+
+    // 计算文件大小
+    const base64Length = dataUrl.split(',')[1].length;
+    const sizeInBytes = (base64Length * 3) / 4;
+    this.previewSize.textContent = this.formatFileSize(sizeInBytes);
+
+    this.showPreview();
+  }
+
+  downloadImage() {
+    const format = this.outputFormat.value;
+    const quality = parseFloat(this.qualitySlider.value);
+
+    let mimeType = 'image/jpeg';
+    let extension = 'jpg';
+    switch (format) {
+      case 'png':
+        mimeType = 'image/png';
+        extension = 'png';
+        break;
+      case 'webp':
+        mimeType = 'image/webp';
+        extension = 'webp';
+        break;
+    }
+
+    const dataUrl = this.canvas.toDataURL(mimeType, quality);
+
+    const link = document.createElement('a');
+    link.download = `edited-image.${extension}`;
+    link.href = dataUrl;
+    link.click();
+  }
+
+  useImage() {
+    const format = this.outputFormat.value;
+    const quality = parseFloat(this.qualitySlider.value);
+
+    let mimeType = 'image/jpeg';
+    switch (format) {
+      case 'png':
+        mimeType = 'image/png';
+        break;
+      case 'webp':
+        mimeType = 'image/webp';
+        break;
+    }
+
+    const dataUrl = this.canvas.toDataURL(mimeType, quality);
+
+    // 调用回调函数
+    if (window.onImageProcessed && typeof window.onImageProcessed === 'function') {
+      window.onImageProcessed(dataUrl, {
+        width: this.canvas.width,
+        height: this.canvas.height,
+        format: format,
+        size: this.getImageSize(dataUrl)
+      });
+    }
+
+    this.showUpload();
+  }
+
+  editAgain() {
+    this.showEditor();
+  }
+
+  showUpload() {
+    this.uploadArea.classList.remove('hidden');
+    this.editorArea.classList.add('hidden');
+    this.previewArea.classList.add('hidden');
+  }
+
+  showEditor() {
+    this.uploadArea.classList.add('hidden');
+    this.editorArea.classList.remove('hidden');
+    this.previewArea.classList.add('hidden');
+  }
+
+  showPreview() {
+    this.uploadArea.classList.add('hidden');
+    this.editorArea.classList.add('hidden');
+    this.previewArea.classList.remove('hidden');
+  }
+
+  formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  getImageSize(dataUrl) {
+    const base64Length = dataUrl.split(',')[1].length;
+    return (base64Length * 3) / 4;
+  }
+}
+
+// 初始化图片编辑器
+document.addEventListener('DOMContentLoaded', () => {
+  new ImageEditor();
+});
+</script>

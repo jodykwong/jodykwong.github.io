@@ -1,0 +1,358 @@
+---
+// LanguageSwitch.astro - 语言切换组件
+import { getCurrentLanguage, getSupportedLanguages } from '../../lib/i18n';
+
+export interface Props {
+  variant?: 'dropdown' | 'toggle';
+  showLabel?: boolean;
+  class?: string;
+}
+
+const { 
+  variant = 'dropdown', 
+  showLabel = true,
+  class: className = ''
+} = Astro.props;
+
+const currentLanguage = getCurrentLanguage();
+const supportedLanguages = getSupportedLanguages();
+---
+
+<div class={`language-switch ${variant} ${className}`}>
+  {variant === 'dropdown' ? (
+    <!-- 下拉菜单样式 -->
+    <div class="language-dropdown">
+      <button 
+        class="language-button"
+        id="language-button"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <span class="language-icon">🌐</span>
+        {showLabel && (
+          <span class="language-label">
+            {supportedLanguages.find(lang => lang.code === currentLanguage)?.nativeName}
+          </span>
+        )}
+        <svg class="dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      
+      <div class="language-menu hidden" id="language-menu">
+        {supportedLanguages.map((language) => (
+          <button
+            class={`language-option ${language.code === currentLanguage ? 'active' : ''}`}
+            data-language={language.code}
+          >
+            <span class="language-name">{language.nativeName}</span>
+            <span class="language-code">{language.name}</span>
+            {language.code === currentLanguage && (
+              <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  ) : (
+    <!-- 切换按钮样式 -->
+    <div class="language-toggle">
+      {supportedLanguages.map((language) => (
+        <button
+          class={`toggle-option ${language.code === currentLanguage ? 'active' : ''}`}
+          data-language={language.code}
+          title={language.name}
+        >
+          {language.code === 'zh-CN' ? '中' : 'EN'}
+        </button>
+      ))}
+    </div>
+  )}
+</div>
+
+<style>
+.language-switch {
+  position: relative;
+  display: inline-block;
+}
+
+/* 下拉菜单样式 */
+.language-dropdown {
+  position: relative;
+}
+
+.language-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.language-button:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--color-primary);
+}
+
+.language-icon {
+  font-size: 1rem;
+}
+
+.language-label {
+  font-weight: 500;
+}
+
+.dropdown-arrow {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.language-button[aria-expanded="true"] .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.language-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.25rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.language-option:hover {
+  background: var(--bg-secondary);
+}
+
+.language-option.active {
+  background: var(--bg-tertiary);
+  color: var(--color-primary);
+}
+
+.language-name {
+  font-weight: 500;
+}
+
+.language-code {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.check-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-primary);
+}
+
+/* 切换按钮样式 */
+.language-toggle {
+  display: flex;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.toggle-option {
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 2.5rem;
+}
+
+.toggle-option:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.toggle-option.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* 隐藏类 */
+.hidden {
+  display: none !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .language-button {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .language-label {
+    display: none;
+  }
+  
+  .toggle-option {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8rem;
+    min-width: 2rem;
+  }
+}
+</style>
+
+<script>
+class LanguageSwitch {
+  constructor() {
+    this.currentLanguage = this.getCurrentLanguage();
+    this.init();
+  }
+
+  init() {
+    this.bindEvents();
+    this.updateUI();
+  }
+
+  bindEvents() {
+    // 下拉菜单事件
+    const languageButton = document.getElementById('language-button');
+    const languageMenu = document.getElementById('language-menu');
+    
+    if (languageButton && languageMenu) {
+      languageButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleDropdown();
+      });
+
+      // 点击外部关闭下拉菜单
+      document.addEventListener('click', () => {
+        this.closeDropdown();
+      });
+    }
+
+    // 语言选项点击事件
+    document.querySelectorAll('[data-language]').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const language = e.target.closest('[data-language]').dataset.language;
+        this.changeLanguage(language);
+      });
+    });
+
+    // 监听语言变更事件
+    window.addEventListener('languageChanged', (e) => {
+      this.currentLanguage = e.detail.language;
+      this.updateUI();
+    });
+  }
+
+  toggleDropdown() {
+    const languageButton = document.getElementById('language-button');
+    const languageMenu = document.getElementById('language-menu');
+    
+    if (languageButton && languageMenu) {
+      const isExpanded = languageButton.getAttribute('aria-expanded') === 'true';
+      
+      languageButton.setAttribute('aria-expanded', (!isExpanded).toString());
+      languageMenu.classList.toggle('hidden', isExpanded);
+    }
+  }
+
+  closeDropdown() {
+    const languageButton = document.getElementById('language-button');
+    const languageMenu = document.getElementById('language-menu');
+    
+    if (languageButton && languageMenu) {
+      languageButton.setAttribute('aria-expanded', 'false');
+      languageMenu.classList.add('hidden');
+    }
+  }
+
+  changeLanguage(language) {
+    if (language !== this.currentLanguage) {
+      // 设置新语言
+      this.setLanguage(language);
+      
+      // 重新加载页面以应用新语言
+      window.location.reload();
+    }
+    
+    this.closeDropdown();
+  }
+
+  updateUI() {
+    // 更新活跃状态
+    document.querySelectorAll('[data-language]').forEach(button => {
+      const language = button.dataset.language;
+      const isActive = language === this.currentLanguage;
+      
+      button.classList.toggle('active', isActive);
+    });
+
+    // 更新下拉菜单标签
+    const languageLabel = document.querySelector('.language-label');
+    if (languageLabel) {
+      const supportedLanguages = [
+        { code: 'zh-CN', nativeName: '中文' },
+        { code: 'en-US', nativeName: 'English' }
+      ];
+      
+      const currentLang = supportedLanguages.find(lang => lang.code === this.currentLanguage);
+      if (currentLang) {
+        languageLabel.textContent = currentLang.nativeName;
+      }
+    }
+  }
+
+  getCurrentLanguage() {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('preferred-language') || 'zh-CN';
+    }
+    return 'zh-CN';
+  }
+
+  setLanguage(language) {
+    this.currentLanguage = language;
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('preferred-language', language);
+      document.documentElement.lang = language;
+      
+      // 触发语言变更事件
+      window.dispatchEvent(new CustomEvent('languageChanged', { 
+        detail: { language } 
+      }));
+    }
+  }
+}
+
+// 初始化语言切换组件
+document.addEventListener('DOMContentLoaded', () => {
+  new LanguageSwitch();
+});
+</script>
