@@ -1,0 +1,274 @@
+---
+// BlogCard.astro - 博客文章卡片组件
+import GlassCard from '../GlassCard.astro';
+
+export interface Props {
+  post: {
+    id: string;
+    title: string;
+    slug: string;
+    excerpt?: string;
+    featured_image_url?: string;
+    published_at?: string;
+    reading_time: number;
+    view_count: number;
+    tags: string[];
+    categories: Array<{
+      id: string;
+      name: string;
+      slug: string;
+      color: string;
+    }>;
+  };
+  showExcerpt?: boolean;
+  showCategories?: boolean;
+  showStats?: boolean;
+}
+
+const { 
+  post, 
+  showExcerpt = true, 
+  showCategories = true, 
+  showStats = true 
+} = Astro.props;
+
+// 格式化发布日期
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+// 截取摘要文本
+const truncateExcerpt = (text: string, maxLength: number = 120) => {
+  if (!text) return '';
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+};
+---
+
+<GlassCard class="blog-card h-full flex flex-col">
+  <!-- 特色图片 -->
+  {post.featured_image_url && (
+    <div class="featured-image mb-4">
+      <img
+        src={post.featured_image_url}
+        alt={post.title}
+        class="w-full h-48 object-cover rounded-lg"
+        loading="lazy"
+      />
+    </div>
+  )}
+
+  <!-- 文章分类 -->
+  {showCategories && post.categories.length > 0 && (
+    <div class="categories mb-3">
+      <div class="flex flex-wrap gap-2">
+        {post.categories.map((category) => (
+          <a
+            href={`/writing/category/${category.slug}`}
+            class="category-tag"
+            style={`background-color: ${category.color}20; color: ${category.color}; border: 1px solid ${category.color}40;`}
+          >
+            {category.name}
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- 文章标题 -->
+  <h3 class="article-title mb-3">
+    <a href={`/writing/${post.slug}`} class="title-link">
+      {post.title}
+    </a>
+  </h3>
+
+  <!-- 文章摘要 -->
+  {showExcerpt && post.excerpt && (
+    <p class="article-excerpt mb-4 flex-grow">
+      {truncateExcerpt(post.excerpt)}
+    </p>
+  )}
+
+  <!-- 文章标签 -->
+  {post.tags.length > 0 && (
+    <div class="tags mb-4">
+      <div class="flex flex-wrap gap-1">
+        {post.tags.slice(0, 3).map((tag) => (
+          <span class="tag">
+            #{tag}
+          </span>
+        ))}
+        {post.tags.length > 3 && (
+          <span class="tag-more">
+            +{post.tags.length - 3}
+          </span>
+        )}
+      </div>
+    </div>
+  )}
+
+  <!-- 文章元信息 -->
+  <div class="article-meta flex items-center justify-between text-sm">
+    <div class="meta-left flex items-center space-x-4">
+      <!-- 发布日期 -->
+      <span class="publish-date flex items-center space-x-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <span>{post.published_at ? formatDate(post.published_at) : '未发布'}</span>
+      </span>
+
+      <!-- 阅读时间 -->
+      <span class="reading-time flex items-center space-x-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>{post.reading_time} 分钟</span>
+      </span>
+    </div>
+
+    <!-- 浏览量 -->
+    {showStats && (
+      <div class="meta-right">
+        <span class="view-count flex items-center space-x-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+          <span>{post.view_count}</span>
+        </span>
+      </div>
+    )}
+  </div>
+</GlassCard>
+
+<style>
+.blog-card {
+  padding: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.blog-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.featured-image img {
+  transition: transform 0.3s ease;
+}
+
+.blog-card:hover .featured-image img {
+  transform: scale(1.02);
+}
+
+.category-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.category-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.article-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.title-link {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.title-link:hover {
+  color: var(--color-primary);
+}
+
+.article-excerpt {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+.tags {
+  min-height: 1.5rem;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  background: var(--bg-tertiary);
+  color: var(--text-tertiary);
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.tag-more {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.article-meta {
+  color: var(--text-tertiary);
+  border-top: 1px solid var(--border-light);
+  padding-top: 1rem;
+  margin-top: auto;
+}
+
+.article-meta svg {
+  opacity: 0.7;
+}
+
+.publish-date,
+.reading-time,
+.view-count {
+  transition: color 0.2s ease;
+}
+
+.publish-date:hover,
+.reading-time:hover,
+.view-count:hover {
+  color: var(--text-secondary);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .blog-card {
+    padding: 1rem;
+  }
+  
+  .article-title {
+    font-size: 1.125rem;
+  }
+  
+  .article-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .meta-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+</style>

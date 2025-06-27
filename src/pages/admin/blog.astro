@@ -1,0 +1,397 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import GlassCard from '../../components/GlassCard.astro';
+import GlassButton from '../../components/GlassButton.astro';
+import { getAllBlogPosts, getBlogCategories } from '../../lib/supabase';
+
+export const prerender = false; // 确保动态渲染
+
+// 获取所有博客文章和分类
+const blogPosts = await getAllBlogPosts();
+const categories = await getBlogCategories();
+
+// 格式化日期
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};
+
+// 获取状态样式
+const getStatusStyle = (published: boolean) => {
+  return published 
+    ? 'background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2);'
+    : 'background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2);';
+};
+---
+
+<AdminLayout title="博客管理">
+  <div class="space-y-6">
+    <!-- 页面标题和操作 -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <h1 class="text-2xl font-bold" style="color: var(--text-primary);">
+          博客文章管理
+        </h1>
+        <p class="text-sm mt-1" style="color: var(--text-secondary);">
+          管理博客文章的创建、编辑和发布
+        </p>
+      </div>
+      
+      <div class="flex gap-3">
+        <GlassButton variant="secondary" href="/admin/blog/categories">
+          管理分类
+        </GlassButton>
+        <GlassButton variant="primary" href="/admin/blog/new">
+          新建文章
+        </GlassButton>
+      </div>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <GlassCard class="p-4 text-center">
+        <div class="text-2xl font-bold" style="color: var(--color-primary);">
+          {blogPosts.length}
+        </div>
+        <div class="text-sm" style="color: var(--text-secondary);">
+          总文章数
+        </div>
+      </GlassCard>
+      
+      <GlassCard class="p-4 text-center">
+        <div class="text-2xl font-bold" style="color: #059669;">
+          {blogPosts.filter(post => post.published).length}
+        </div>
+        <div class="text-sm" style="color: var(--text-secondary);">
+          已发布
+        </div>
+      </GlassCard>
+      
+      <GlassCard class="p-4 text-center">
+        <div class="text-2xl font-bold" style="color: #d97706;">
+          {blogPosts.filter(post => !post.published).length}
+        </div>
+        <div class="text-sm" style="color: var(--text-secondary);">
+          草稿
+        </div>
+      </GlassCard>
+      
+      <GlassCard class="p-4 text-center">
+        <div class="text-2xl font-bold" style="color: var(--color-primary);">
+          {blogPosts.reduce((sum, post) => sum + post.view_count, 0)}
+        </div>
+        <div class="text-sm" style="color: var(--text-secondary);">
+          总浏览量
+        </div>
+      </GlassCard>
+    </div>
+
+    <!-- 筛选和搜索 -->
+    <GlassCard class="p-4">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+          <input
+            type="text"
+            id="search-posts"
+            placeholder="搜索文章标题或内容..."
+            class="w-full px-4 py-2 rounded-lg border"
+            style="background: var(--bg-secondary); border-color: var(--border-light); color: var(--text-primary);"
+          />
+        </div>
+        
+        <div class="flex gap-2">
+          <select
+            id="filter-status"
+            class="px-4 py-2 rounded-lg border"
+            style="background: var(--bg-secondary); border-color: var(--border-light); color: var(--text-primary);"
+          >
+            <option value="">所有状态</option>
+            <option value="published">已发布</option>
+            <option value="draft">草稿</option>
+          </select>
+          
+          <select
+            id="filter-category"
+            class="px-4 py-2 rounded-lg border"
+            style="background: var(--bg-secondary); border-color: var(--border-light); color: var(--text-primary);"
+          >
+            <option value="">所有分类</option>
+            {categories.map((category) => (
+              <option value={category.id}>{category.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </GlassCard>
+
+    <!-- 文章列表 -->
+    <GlassCard class="overflow-hidden">
+      {blogPosts.length > 0 ? (
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead style="background: var(--bg-secondary);">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-secondary);">
+                  文章
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-secondary);">
+                  分类
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-secondary);">
+                  状态
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-secondary);">
+                  统计
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-secondary);">
+                  日期
+                </th>
+                <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider" style="color: var(--text-secondary);">
+                  操作
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y" style="divide-color: var(--border-light);">
+              {blogPosts.map((post) => (
+                <tr class="hover:bg-opacity-50" style="hover:background: var(--bg-secondary);">
+                  <!-- 文章信息 -->
+                  <td class="px-6 py-4">
+                    <div class="flex items-start space-x-3">
+                      {post.featured_image_url && (
+                        <img
+                          src={post.featured_image_url}
+                          alt={post.title}
+                          class="w-12 h-12 object-cover rounded-lg flex-shrink-0"
+                        />
+                      )}
+                      <div class="min-w-0 flex-1">
+                        <div class="text-sm font-medium" style="color: var(--text-primary);">
+                          <a href={`/admin/blog/edit/${post.id}`} class="hover:text-blue-600">
+                            {post.title}
+                          </a>
+                        </div>
+                        {post.excerpt && (
+                          <div class="text-xs mt-1" style="color: var(--text-secondary);">
+                            {post.excerpt.substring(0, 80)}...
+                          </div>
+                        )}
+                        <div class="flex items-center space-x-2 mt-1">
+                          <span class="text-xs" style="color: var(--text-tertiary);">
+                            {post.reading_time} 分钟阅读
+                          </span>
+                          {post.tags.length > 0 && (
+                            <span class="text-xs" style="color: var(--text-tertiary);">
+                              • {post.tags.slice(0, 2).join(', ')}
+                              {post.tags.length > 2 && ` +${post.tags.length - 2}`}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- 分类 -->
+                  <td class="px-6 py-4">
+                    <div class="flex flex-wrap gap-1">
+                      {post.categories.slice(0, 2).map((category) => (
+                        <span
+                          class="inline-block px-2 py-1 text-xs rounded-full"
+                          style={`background-color: ${category.color}20; color: ${category.color};`}
+                        >
+                          {category.name}
+                        </span>
+                      ))}
+                      {post.categories.length > 2 && (
+                        <span class="text-xs" style="color: var(--text-tertiary);">
+                          +{post.categories.length - 2}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+
+                  <!-- 状态 -->
+                  <td class="px-6 py-4">
+                    <span
+                      class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                      style={getStatusStyle(post.published)}
+                    >
+                      {post.published ? '已发布' : '草稿'}
+                    </span>
+                  </td>
+
+                  <!-- 统计 -->
+                  <td class="px-6 py-4">
+                    <div class="text-sm" style="color: var(--text-primary);">
+                      {post.view_count} 浏览
+                    </div>
+                  </td>
+
+                  <!-- 日期 -->
+                  <td class="px-6 py-4">
+                    <div class="text-sm" style="color: var(--text-secondary);">
+                      {post.published_at ? formatDate(post.published_at) : formatDate(post.created_at)}
+                    </div>
+                  </td>
+
+                  <!-- 操作 -->
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex justify-end space-x-2">
+                      <a
+                        href={`/writing/${post.slug}`}
+                        target="_blank"
+                        class="text-xs px-3 py-1 rounded border transition-colors"
+                        style="background: var(--bg-tertiary); color: var(--text-secondary); border-color: var(--border-light);"
+                        title="预览"
+                      >
+                        预览
+                      </a>
+                      <a
+                        href={`/admin/blog/edit/${post.id}`}
+                        class="text-xs px-3 py-1 rounded border transition-colors"
+                        style="background: var(--color-primary); color: white; border-color: var(--color-primary);"
+                      >
+                        编辑
+                      </a>
+                      <button
+                        onclick={`deleteBlogPost('${post.id}', '${post.title}')`}
+                        class="text-xs px-3 py-1 rounded border transition-colors"
+                        style="background: #ef4444; color: white; border-color: #ef4444;"
+                      >
+                        删除
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <!-- 空状态 -->
+        <div class="p-12 text-center">
+          <div class="text-6xl mb-4">📝</div>
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary);">
+            还没有博客文章
+          </h3>
+          <p class="mb-6" style="color: var(--text-secondary);">
+            开始创建你的第一篇博客文章吧！
+          </p>
+          <GlassButton variant="primary" href="/admin/blog/new">
+            创建第一篇文章
+          </GlassButton>
+        </div>
+      )}
+    </GlassCard>
+  </div>
+</AdminLayout>
+
+<script>
+// 删除博客文章
+async function deleteBlogPost(postId, postTitle) {
+  if (!confirm(`确定要删除文章"${postTitle}"吗？此操作不可撤销。`)) {
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/blog/delete', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: postId }),
+    });
+
+    if (response.ok) {
+      alert('文章删除成功！');
+      window.location.reload();
+    } else {
+      const error = await response.json();
+      alert('删除失败: ' + error.message);
+    }
+  } catch (error) {
+    console.error('删除文章失败:', error);
+    alert('删除失败，请重试');
+  }
+}
+
+// 搜索和筛选功能
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('search-posts');
+  const statusFilter = document.getElementById('filter-status');
+  const categoryFilter = document.getElementById('filter-category');
+  const tableRows = document.querySelectorAll('tbody tr');
+
+  function filterPosts() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const statusValue = statusFilter.value;
+    const categoryValue = categoryFilter.value;
+
+    tableRows.forEach(row => {
+      const title = row.querySelector('td:first-child .text-sm').textContent.toLowerCase();
+      const status = row.querySelector('td:nth-child(3) span').textContent.trim();
+      const categories = Array.from(row.querySelectorAll('td:nth-child(2) span')).map(span => span.textContent);
+
+      let showRow = true;
+
+      // 搜索过滤
+      if (searchTerm && !title.includes(searchTerm)) {
+        showRow = false;
+      }
+
+      // 状态过滤
+      if (statusValue) {
+        const isPublished = status === '已发布';
+        if ((statusValue === 'published' && !isPublished) || 
+            (statusValue === 'draft' && isPublished)) {
+          showRow = false;
+        }
+      }
+
+      // 分类过滤 (这里需要更复杂的逻辑，暂时简化)
+      if (categoryValue && !categories.some(cat => cat.includes(categoryValue))) {
+        // showRow = false;
+      }
+
+      row.style.display = showRow ? '' : 'none';
+    });
+  }
+
+  searchInput.addEventListener('input', filterPosts);
+  statusFilter.addEventListener('change', filterPosts);
+  categoryFilter.addEventListener('change', filterPosts);
+});
+
+// 全局函数，供 HTML 调用
+window.deleteBlogPost = deleteBlogPost;
+</script>
+
+<style>
+/* 表格样式优化 */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+th:first-child {
+  border-top-left-radius: 0.5rem;
+}
+
+th:last-child {
+  border-top-right-radius: 0.5rem;
+}
+
+/* 响应式表格 */
+@media (max-width: 768px) {
+  .overflow-x-auto {
+    font-size: 0.875rem;
+  }
+  
+  th, td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+</style>

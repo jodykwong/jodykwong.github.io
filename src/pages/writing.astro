@@ -3,40 +3,51 @@ import Layout from '../layouts/Layout.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
 import GlassCard from '../components/GlassCard.astro';
 import GlassButton from '../components/GlassButton.astro';
+import BlogCard from '../components/blog/BlogCard.astro';
+import { getPublishedBlogPosts, getBlogCategories } from '../lib/supabase';
 
-const posts = [
-  {
-    title: "Building a SaaS from Scratch: Lessons Learned",
-    excerpt: "My journey of building a SaaS product from idea to launch, including the mistakes I made and what I learned along the way.",
-    date: "2024-01-15",
-    slug: "building-saas-from-scratch",
-    readTime: "8 min read"
-  },
-  {
-    title: "The Art of Side Projects",
-    excerpt: "How side projects can accelerate your career and provide creative fulfillment, plus tips for managing them alongside full-time work.",
-    date: "2023-12-10",
-    slug: "art-of-side-projects",
-    readTime: "6 min read"
-  },
-  {
-    title: "Why I Chose Astro for My Personal Website",
-    excerpt: "A deep dive into why I selected Astro over other static site generators and how it's working out so far.",
-    date: "2023-11-22",
-    slug: "why-astro-personal-website",
-    readTime: "5 min read"
-  },
-  {
-    title: "Remote Work: 5 Years of Lessons",
-    excerpt: "What I've learned about productivity, communication, and work-life balance after five years of remote work.",
-    date: "2023-10-08",
-    slug: "remote-work-lessons",
-    readTime: "7 min read"
-  }
-];
+export const prerender = false; // 确保动态渲染
+
+// 获取博客文章和分类
+const blogPosts = await getPublishedBlogPosts();
+const categories = await getBlogCategories();
+
+// 获取 URL 参数
+const url = new URL(Astro.request.url);
+const searchQuery = url.searchParams.get('search') || '';
+const categoryFilter = url.searchParams.get('category') || '';
+
+// 过滤文章
+let filteredPosts = blogPosts;
+
+if (categoryFilter) {
+  filteredPosts = blogPosts.filter(post =>
+    post.categories.some(cat => cat.slug === categoryFilter)
+  );
+}
+
+if (searchQuery) {
+  const query = searchQuery.toLowerCase();
+  filteredPosts = filteredPosts.filter(post =>
+    post.title.toLowerCase().includes(query) ||
+    post.excerpt?.toLowerCase().includes(query) ||
+    post.tags.some(tag => tag.toLowerCase().includes(query))
+  );
+}
+
+// 获取当前分类信息
+const currentCategory = categoryFilter ?
+  categories.find(cat => cat.slug === categoryFilter) : null;
+
+// 页面标题
+const pageTitle = currentCategory ?
+  `${currentCategory.name} - 写作分享` :
+  searchQuery ?
+    `搜索: ${searchQuery} - 写作分享` :
+    '写作分享';
 
 function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('en-US', {
+  return new Date(dateString).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -44,57 +55,111 @@ function formatDate(dateString: string) {
 }
 ---
 
-<Layout title="Writing | Your Name">
-  <div class="max-w-4xl mx-auto">
-    <!-- 页面标题 -->
-    <GlassCard class="p-8 mb-8 text-center fade-in">
-      <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
-        ✍️ Writing
+<Layout title={pageTitle}>
+  <div class="max-w-6xl mx-auto px-6 py-12">
+    <!-- 页面标题和描述 -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6 slide-up" style="color: var(--text-primary);">
+        {currentCategory ? currentCategory.name : searchQuery ? `搜索结果` : '✍️ 写作分享'}
       </h1>
-      <p class="text-lg" style="color: var(--text-secondary);">
-        I write about software development, entrepreneurship, and the journey of building products.
-        Here are some of my recent posts.
+      <p class="text-lg md:text-xl mb-8 slide-up" style="color: var(--text-secondary); animation-delay: 100ms;">
+        {currentCategory ?
+          currentCategory.description || `关于${currentCategory.name}的文章` :
+          searchQuery ?
+            `找到 ${filteredPosts.length} 篇相关文章` :
+            '分享技术见解、产品思考和创业心得'
+        }
       </p>
-    </GlassCard>
+    </div>
+
+    <!-- 搜索和筛选 -->
+    <div class="mb-8">
+      <GlassCard class="p-6">
+        <div class="flex flex-col md:flex-row gap-4">
+          <!-- 搜索框 -->
+          <div class="flex-1">
+            <form method="GET" class="relative">
+              <input
+                type="text"
+                name="search"
+                value={searchQuery}
+                placeholder="搜索文章标题、内容或标签..."
+                class="w-full px-4 py-3 pr-12 rounded-lg border"
+                style="background: var(--bg-secondary); border-color: var(--border-light); color: var(--text-primary);"
+              />
+              <button
+                type="submit"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2"
+                style="color: var(--text-tertiary);"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </button>
+              {categoryFilter && (
+                <input type="hidden" name="category" value={categoryFilter} />
+              )}
+            </form>
+          </div>
+
+          <!-- 分类筛选 -->
+          <div class="flex flex-wrap gap-2">
+            <a
+              href="/writing"
+              class={`category-filter ${!categoryFilter ? 'active' : ''}`}
+            >
+              全部
+            </a>
+            {categories.map((category) => (
+              <a
+                href={`/writing?category=${category.slug}`}
+                class={`category-filter ${categoryFilter === category.slug ? 'active' : ''}`}
+                style={categoryFilter === category.slug ?
+                  `background-color: ${category.color}20; color: ${category.color}; border-color: ${category.color};` :
+                  ''
+                }
+              >
+                {category.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      </GlassCard>
+    </div>
 
     <!-- 文章列表 -->
-    <div class="space-y-6">
-      {posts.map((post, index) => (
-        <GlassCard class="p-6 slide-up" style={`animation-delay: ${index * 100}ms;`}>
-          <article>
-            <div class="flex items-center gap-4 text-sm mb-4" style="color: var(--text-tertiary);">
-              <time datetime={post.date}>
-                {formatDate(post.date)}
-              </time>
-              <span>•</span>
-              <span>{post.readTime}</span>
-            </div>
-
-            <h2 class="text-2xl font-semibold mb-3">
-              <a href={`/writing/${post.slug}`} class="text-primary hover:text-blue-600 transition-colors">
-                {post.title}
-              </a>
-            </h2>
-
-            <p class="mb-4 leading-relaxed" style="color: var(--text-secondary);">
-              {post.excerpt}
-            </p>
-
-            <div class="flex gap-3">
-              <GlassButton variant="primary" size="sm" href={`/writing/${post.slug}`} class="inline-flex items-center">
-                Read more
-                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </GlassButton>
-              <GlassButton variant="secondary" size="sm" href="#">
-                Share
-              </GlassButton>
-            </div>
-          </article>
-        </GlassCard>
-      ))}
-    </div>
+    {filteredPosts.length > 0 ? (
+      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {filteredPosts.map((post, index) => (
+          <div class="slide-up" style={`animation-delay: ${index * 100}ms;`}>
+            <BlogCard post={post} />
+          </div>
+        ))}
+      </div>
+    ) : (
+      <!-- 空状态 -->
+      <GlassCard class="p-12 text-center">
+        <div class="text-6xl mb-6">📝</div>
+        <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
+          {searchQuery || categoryFilter ? '没有找到相关文章' : '暂无文章'}
+        </h2>
+        <p class="mb-6" style="color: var(--text-secondary); line-height: 1.6;">
+          {searchQuery || categoryFilter ?
+            '尝试调整搜索关键词或选择其他分类' :
+            '文章正在准备中，敬请期待精彩内容！'
+          }
+        </p>
+        {(searchQuery || categoryFilter) && (
+          <a
+            href="/writing"
+            class="inline-flex items-center px-6 py-3 rounded-lg font-medium transition-colors"
+            style="background: var(--color-primary); color: white;"
+          >
+            查看所有文章
+          </a>
+        )}
+      </GlassCard>
+    )}
 
     <!-- 订阅区域 -->
     <GlassCard class="p-8 mt-8 text-center slide-up" style="animation-delay: 400ms;">
@@ -117,3 +182,52 @@ function formatDate(dateString: string) {
     </GlassCard>
   </div>
 </Layout>
+
+<style>
+.category-filter {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+
+.category-filter:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.category-filter.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+/* 动画效果 */
+.slide-up {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideUp 0.6s ease forwards;
+}
+
+@keyframes slideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .category-filter {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+  }
+}
+</style>

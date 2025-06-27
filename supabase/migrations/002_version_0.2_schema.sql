@@ -289,6 +289,51 @@ LEFT JOIN content_translations ct ON p.id = ct.content_id AND ct.content_type = 
 GROUP BY p.id;
 
 -- =====================================================
+-- 10. 数据库函数
+-- =====================================================
+
+-- 增加博客文章浏览量的函数
+CREATE OR REPLACE FUNCTION increment_blog_post_view_count(post_id UUID)
+RETURNS VOID AS $$
+BEGIN
+    UPDATE blog_posts
+    SET view_count = view_count + 1,
+        updated_at = NOW()
+    WHERE id = post_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 计算阅读时间的函数（基于内容长度）
+CREATE OR REPLACE FUNCTION calculate_reading_time(content_text TEXT)
+RETURNS INTEGER AS $$
+DECLARE
+    word_count INTEGER;
+    reading_time INTEGER;
+BEGIN
+    -- 估算单词数（中文按字符数/2，英文按空格分割）
+    word_count := (LENGTH(content_text) - LENGTH(REPLACE(content_text, ' ', ''))) + (LENGTH(content_text) / 2);
+
+    -- 按每分钟200字计算阅读时间
+    reading_time := GREATEST(1, ROUND(word_count / 200.0));
+
+    RETURN reading_time;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 自动计算阅读时间的触发器
+CREATE OR REPLACE FUNCTION auto_calculate_reading_time()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.reading_time = calculate_reading_time(NEW.content);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER auto_calculate_reading_time_trigger
+    BEFORE INSERT OR UPDATE ON blog_posts
+    FOR EACH ROW EXECUTE FUNCTION auto_calculate_reading_time();
+
+-- =====================================================
 -- 迁移完成
 -- =====================================================
 

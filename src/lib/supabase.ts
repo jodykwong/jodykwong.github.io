@@ -578,3 +578,308 @@ export async function updateSocialLink(id: string, updates: Partial<SocialLink>)
 
   return { success: true, data };
 }
+
+// =====================================================
+// 博客文章管理系统 (版本 0.2)
+// =====================================================
+
+export interface BlogCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  color: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string;
+  featured_image_url?: string;
+  published: boolean;
+  published_at?: string;
+  author_id: string;
+  tags: string[];
+  reading_time: number;
+  view_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BlogPostWithCategories extends BlogPost {
+  categories: BlogCategory[];
+}
+
+// 获取所有博客分类
+export async function getBlogCategories(): Promise<BlogCategory[]> {
+  const { data, error } = await supabase
+    .from('blog_categories')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching blog categories:', error);
+    return [];
+  }
+
+  return data as BlogCategory[];
+}
+
+// 获取单个博客分类
+export async function getBlogCategoryBySlug(slug: string): Promise<BlogCategory | null> {
+  const { data, error } = await supabase
+    .from('blog_categories')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error) {
+    console.error('Error fetching blog category:', error);
+    return null;
+  }
+
+  return data as BlogCategory;
+}
+
+// 创建博客分类
+export async function createBlogCategory(category: Omit<BlogCategory, 'id' | 'created_at' | 'updated_at'>) {
+  const { data, error } = await supabase
+    .from('blog_categories')
+    .insert([category])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating blog category:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, data };
+}
+
+// 更新博客分类
+export async function updateBlogCategory(id: string, updates: Partial<BlogCategory>) {
+  const { data, error } = await supabase
+    .from('blog_categories')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating blog category:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, data };
+}
+
+// 删除博客分类
+export async function deleteBlogCategory(id: string) {
+  const { error } = await supabase
+    .from('blog_categories')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting blog category:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+// 获取已发布的博客文章（前台使用）
+export async function getPublishedBlogPosts(limit?: number): Promise<BlogPostWithCategories[]> {
+  let query = supabase
+    .from('blog_posts_with_categories')
+    .select('*')
+    .eq('published', true)
+    .order('published_at', { ascending: false });
+
+  if (limit) {
+    query = query.limit(limit);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching published blog posts:', error);
+    return [];
+  }
+
+  return data as BlogPostWithCategories[];
+}
+
+// 获取所有博客文章（管理后台使用）
+export async function getAllBlogPosts(): Promise<BlogPostWithCategories[]> {
+  const { data, error } = await supabase
+    .from('blog_posts_with_categories')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching all blog posts:', error);
+    return [];
+  }
+
+  return data as BlogPostWithCategories[];
+}
+
+// 根据 slug 获取博客文章
+export async function getBlogPostBySlug(slug: string): Promise<BlogPostWithCategories | null> {
+  const { data, error } = await supabase
+    .from('blog_posts_with_categories')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error) {
+    console.error('Error fetching blog post by slug:', error);
+    return null;
+  }
+
+  // 增加浏览量
+  await incrementBlogPostViewCount(data.id);
+
+  return data as BlogPostWithCategories;
+}
+
+// 根据分类获取博客文章
+export async function getBlogPostsByCategory(categorySlug: string): Promise<BlogPostWithCategories[]> {
+  const { data, error } = await supabase
+    .from('blog_posts_with_categories')
+    .select('*')
+    .eq('published', true)
+    .order('published_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching blog posts by category:', error);
+    return [];
+  }
+
+  // 过滤包含指定分类的文章
+  const filteredPosts = (data as BlogPostWithCategories[]).filter(post =>
+    post.categories.some(category => category.slug === categorySlug)
+  );
+
+  return filteredPosts;
+}
+
+// 搜索博客文章
+export async function searchBlogPosts(query: string): Promise<BlogPostWithCategories[]> {
+  const { data, error } = await supabase
+    .from('blog_posts_with_categories')
+    .select('*')
+    .eq('published', true)
+    .or(`title.ilike.%${query}%,content.ilike.%${query}%,tags.cs.{${query}}`)
+    .order('published_at', { ascending: false });
+
+  if (error) {
+    console.error('Error searching blog posts:', error);
+    return [];
+  }
+
+  return data as BlogPostWithCategories[];
+}
+
+// 创建博客文章
+export async function createBlogPost(post: Omit<BlogPost, 'id' | 'created_at' | 'updated_at' | 'view_count'>) {
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .insert([{
+      ...post,
+      view_count: 0
+    }])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating blog post:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, data };
+}
+
+// 更新博客文章
+export async function updateBlogPost(id: string, updates: Partial<BlogPost>) {
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating blog post:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, data };
+}
+
+// 删除博客文章
+export async function deleteBlogPost(id: string) {
+  const { error } = await supabase
+    .from('blog_posts')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting blog post:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+// 增加博客文章浏览量
+export async function incrementBlogPostViewCount(id: string) {
+  const { error } = await supabase.rpc('increment_blog_post_view_count', {
+    post_id: id
+  });
+
+  if (error) {
+    console.error('Error incrementing view count:', error);
+  }
+}
+
+// 设置文章分类关联
+export async function setBlogPostCategories(postId: string, categoryIds: string[]) {
+  // 先删除现有关联
+  await supabase
+    .from('blog_post_categories')
+    .delete()
+    .eq('post_id', postId);
+
+  // 添加新关联
+  if (categoryIds.length > 0) {
+    const associations = categoryIds.map(categoryId => ({
+      post_id: postId,
+      category_id: categoryId
+    }));
+
+    const { error } = await supabase
+      .from('blog_post_categories')
+      .insert(associations);
+
+    if (error) {
+      console.error('Error setting blog post categories:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  return { success: true };
+}
