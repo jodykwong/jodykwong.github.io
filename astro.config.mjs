@@ -28,20 +28,13 @@ export default defineConfig({
     // 启用资源内联优化
     inlineStylesheets: 'auto',
     // 生成静态文件
-    format: 'directory',
-    // 启用资源压缩
-    assets: {
-      // 压缩图片
-      images: true
-    }
+    format: 'directory'
   },
 
   vite: {
     build: {
       // 启用CSS压缩
       cssCodeSplit: true,
-      // 启用JS压缩
-      minify: 'terser',
       // 优化chunk大小
       rollupOptions: {
         output: {
