@@ -1,0 +1,108 @@
+---
+import { getAlternateLanguageUrl, type Language } from '../../lib/i18n';
+
+export interface Props {
+  variant?: 'dropdown' | 'toggle';
+  showLabel?: boolean;
+  currentLanguage?: Language;
+}
+
+const { variant = 'dropdown', showLabel = true, currentLanguage = 'zh-CN' } = Astro.props;
+
+// 获取当前URL路径
+const currentPath = Astro.url.pathname;
+
+// 生成切换到另一种语言的URL
+const targetLanguage: Language = currentLanguage === 'zh-CN' ? 'en-US' : 'zh-CN';
+
+// 移除当前语言前缀，获取纯路径
+const pathWithoutLang = currentPath.replace(/^\/(zh|en)\/?/, '') || '';
+
+// 生成目标语言的URL
+const targetLangPrefix = targetLanguage === 'zh-CN' ? 'zh' : 'en';
+const alternateUrl = pathWithoutLang ? `/${targetLangPrefix}/${pathWithoutLang}` : `/${targetLangPrefix}`;
+
+// 显示文本
+const currentLangText = currentLanguage === 'zh-CN' ? '中文' : 'English';
+const targetLangText = currentLanguage === 'zh-CN' ? 'English' : '中文';
+---
+
+{variant === 'dropdown' ? (
+  <!-- 下拉菜单样式 -->
+  <div class="relative" id="language-dropdown">
+    <button 
+      class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+      style="background: var(--bg-secondary); border: 1px solid var(--border-light); color: var(--text-primary);"
+      id="language-button"
+      aria-expanded="false"
+      aria-haspopup="true"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+      </svg>
+      {showLabel && <span>{currentLangText}</span>}
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M7 10l5 5 5-5z"/>
+      </svg>
+    </button>
+    
+    <div 
+      class="absolute right-0 mt-2 w-32 rounded-lg shadow-lg hidden"
+      style="background: var(--bg-primary); border: 1px solid var(--border-light); backdrop-filter: blur(20px);"
+      id="language-menu"
+    >
+      <div class="py-1">
+        <a
+          href={currentLanguage === 'zh-CN' ? currentPath : (pathWithoutLang ? `/zh/${pathWithoutLang}` : '/zh')}
+          class="block w-full text-left px-4 py-2 hover:bg-opacity-50 transition-colors"
+          style="color: var(--text-primary);"
+        >
+          中文
+        </a>
+        <a
+          href={currentLanguage === 'en-US' ? currentPath : (pathWithoutLang ? `/en/${pathWithoutLang}` : '/en')}
+          class="block w-full text-left px-4 py-2 hover:bg-opacity-50 transition-colors"
+          style="color: var(--text-primary);"
+        >
+          English
+        </a>
+      </div>
+    </div>
+  </div>
+) : (
+  <!-- 切换按钮样式 -->
+  <a 
+    href={alternateUrl}
+    class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+    style="background: var(--bg-secondary); border: 1px solid var(--border-light); color: var(--text-primary);"
+    title={`Switch to ${targetLangText}`}
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+    </svg>
+    <span>{currentLanguage === 'zh-CN' ? '中/EN' : 'EN/中'}</span>
+  </a>
+)}
+
+<script>
+  // 下拉菜单交互
+  document.addEventListener('DOMContentLoaded', function() {
+    const button = document.getElementById('language-button');
+    const menu = document.getElementById('language-menu');
+    
+    if (button && menu) {
+      button.addEventListener('click', function() {
+        menu.classList.toggle('hidden');
+        button.setAttribute('aria-expanded', menu.classList.contains('hidden') ? 'false' : 'true');
+      });
+      
+      // 点击外部关闭菜单
+      document.addEventListener('click', function(event) {
+        if (!button.contains(event.target as Node) && !menu.contains(event.target as Node)) {
+          menu.classList.add('hidden');
+          button.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+  });
+</script>

@@ -32,67 +32,58 @@ const formatSkills = (skillString: string): string[] => {
 };
 ---
 
-<Layout title={`${t('about.title')} | ${t('home.title')}`}>
+<Layout title="关于我 | Jody Kwong">
   <div class="max-w-4xl mx-auto">
     <!-- 页面标题 -->
     <GlassCard class="p-8 mb-8 text-center fade-in">
-      <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
-        👋 {t('about.title')}
+      <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);" data-i18n="about.title">
+        👋 关于我
       </h1>
-      <p class="text-xl" style="color: var(--text-secondary);">
-        {t('about.subtitle')}
+      <p class="text-xl" style="color: var(--text-secondary);" data-i18n="about.subtitle">
+        我是一名全栈开发者和创业者，热衷于构建解决实际问题的产品。
       </p>
     </GlassCard>
 
     <!-- 背景介绍 -->
     <GlassCard class="p-6 mb-6 slide-up">
-      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
-        🚀 {t('about.background')}
+      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);" data-i18n="about.background">
+        🚀 背景介绍
       </h2>
       <div style="color: var(--text-secondary); line-height: 1.7;">
-        <p class="mb-4">
-          I started my career as a software developer over a decade ago, working with various technologies
-          and learning the ins and outs of building scalable web applications. Over the years, I've had
-          the opportunity to work with startups, established companies, and everything in between.
+        <p class="mb-4" data-i18n="about.backgroundContent1">
+          我十多年前开始了软件开发者的职业生涯，使用各种技术并学习构建可扩展Web应用程序的方方面面。多年来，我有机会与初创公司、成熟公司以及介于两者之间的各种公司合作。
         </p>
 
-        <p class="mb-4">
-          In 2015, I joined Amazing Company as a senior developer and eventually became their CTO.
-          During my time there, I led a team of talented engineers and helped build their flagship product
-          from the ground up. It was an incredible learning experience that taught me not just about
-          technology, but about leadership, product development, and building sustainable businesses.
+        <p class="mb-4" data-i18n="about.backgroundContent2">
+          2015年，我作为高级开发者加入Amazing Company，最终成为他们的首席技术官。在那里的时间里，我领导了一个才华横溢的工程师团队，帮助从头开始构建他们的旗舰产品。这是一次令人难以置信的学习经历，不仅教会了我技术，还有领导力、产品开发和构建可持续业务。
         </p>
       </div>
     </GlassCard>
 
     <!-- 当前专注 -->
     <GlassCard class="p-6 mb-6 slide-up" style="animation-delay: 100ms;">
-      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
-        🎯 {t('about.currentFocus')}
+      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);" data-i18n="about.currentFocus">
+        🎯 当前专注
       </h2>
       <div style="color: var(--text-secondary); line-height: 1.7;">
-        <p class="mb-4">
-          These days, I'm focused on building my own products and helping other entrepreneurs bring their
-          ideas to life. My main project is a SaaS boilerplate that helps developers launch their products
-          faster by providing a solid foundation with authentication, payments, and all the other features
-          every SaaS needs.
+        <p class="mb-4" data-i18n="about.currentFocusContent1">
+          最近，我专注于构建自己的产品并帮助其他创业者将他们的想法变为现实。我的主要项目是一个SaaS样板，通过提供包含身份验证、支付和每个SaaS都需要的所有其他功能的坚实基础，帮助开发者更快地推出他们的产品。
         </p>
 
-        <p class="mb-4">
-          I'm also passionate about sharing what I've learned through writing and speaking. You can find
-          my thoughts on software development, entrepreneurship, and product building throughout this site.
+        <p class="mb-4" data-i18n="about.currentFocusContent2">
+          我也热衷于通过写作和演讲分享我学到的东西。您可以在这个网站上找到我对软件开发、创业和产品构建的想法。
         </p>
       </div>
     </GlassCard>
 
     <!-- 技术技能 -->
     <GlassCard class="p-6 mb-6 slide-up" style="animation-delay: 200ms;">
-      <h2 class="text-2xl font-semibold mb-6" style="color: var(--text-primary);">
-        💻 {t('about.technicalSkills')}
+      <h2 class="text-2xl font-semibold mb-6" style="color: var(--text-primary);" data-i18n="about.technicalSkills">
+        💻 技术技能
       </h2>
       <div class="grid md:grid-cols-2 gap-6">
         <div class="glass-subtle p-4 rounded-xl">
-          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">{t('about.frontend')}</h3>
+          <h3 class="font-semibold mb-3" style="color: var(--text-primary);" data-i18n="about.frontend">前端开发</h3>
           <ul class="space-y-2" style="color: var(--text-secondary);">
             {formatSkills(skills.frontend).map((skill: string) => (
               <li>• {skill}</li>
@@ -101,7 +92,7 @@ const formatSkills = (skillString: string): string[] => {
         </div>
 
         <div class="glass-subtle p-4 rounded-xl">
-          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">{t('about.backend')}</h3>
+          <h3 class="font-semibold mb-3" style="color: var(--text-primary);" data-i18n="about.backend">后端开发</h3>
           <ul class="space-y-2" style="color: var(--text-secondary);">
             {formatSkills(skills.backend).map((skill: string) => (
               <li>• {skill}</li>
@@ -110,7 +101,7 @@ const formatSkills = (skillString: string): string[] => {
         </div>
 
         <div class="glass-subtle p-4 rounded-xl">
-          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">{t('about.devops')}</h3>
+          <h3 class="font-semibold mb-3" style="color: var(--text-primary);" data-i18n="about.devops">运维部署</h3>
           <ul class="space-y-2" style="color: var(--text-secondary);">
             {formatSkills(skills.devops).map((skill: string) => (
               <li>• {skill}</li>
@@ -119,7 +110,7 @@ const formatSkills = (skillString: string): string[] => {
         </div>
 
         <div class="glass-subtle p-4 rounded-xl">
-          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">{t('about.other')}</h3>
+          <h3 class="font-semibold mb-3" style="color: var(--text-primary);" data-i18n="about.other">其他技能</h3>
           <ul class="space-y-2" style="color: var(--text-secondary);">
             {formatSkills(skills.other).map((skill: string) => (
               <li>• {skill}</li>
@@ -131,33 +122,27 @@ const formatSkills = (skillString: string): string[] => {
 
     <!-- 个人信息 -->
     <GlassCard class="p-6 mb-6 slide-up" style="animation-delay: 300ms;">
-      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
-        🌟 Personal
+      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);" data-i18n="about.personal">
+        🌟 个人
       </h2>
       <div style="color: var(--text-secondary); line-height: 1.7;">
-        <p class="mb-4">
-          When I'm not coding or writing, you can find me hiking, reading, or experimenting with new
-          technologies. I'm based in [Your City] and love the local tech community here. I'm always
-          up for a coffee chat about technology, startups, or anything interesting.
+        <p class="mb-4" data-i18n="about.personalContent1">
+          当我不编程或写作时，你可以发现我在徒步、阅读或尝试新技术。我住在[您的城市]，喜欢这里的本地技术社区。我总是乐意与人聊聊技术、初创公司或任何有趣的事情。
         </p>
 
-        <p class="mb-4">
-          I believe in the power of technology to solve real problems and make people's lives better.
-          Whether it's through the products I build, the teams I lead, or the content I create,
-          my goal is always to have a positive impact.
+        <p class="mb-4" data-i18n="about.personalContent2">
+          我相信技术解决实际问题并让人们的生活更美好的力量。无论是通过我构建的产品、我领导的团队，还是我创建的内容，我的目标始终是产生积极的影响。
         </p>
       </div>
     </GlassCard>
 
     <!-- 联系方式 -->
     <GlassCard class="p-8 text-center slide-up" style="animation-delay: 400ms;">
-      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
-        🤝 Let's Connect
+      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);" data-i18n="about.connect">
+        🤝 让我们联系
       </h2>
-      <p class="mb-6" style="color: var(--text-secondary); line-height: 1.6;">
-        I'm always interested in meeting new people and hearing about interesting projects.
-        Whether you want to collaborate, need advice, or just want to chat about technology,
-        feel free to reach out!
+      <p class="mb-6" style="color: var(--text-secondary); line-height: 1.6;" data-i18n="about.connectContent">
+        我总是有兴趣认识新朋友并了解有趣的项目。无论您想合作、需要建议，还是只是想聊聊技术，请随时联系我！
       </p>
 
       <div class="flex flex-wrap justify-center gap-4">
@@ -198,13 +183,13 @@ const formatSkills = (skillString: string): string[] => {
                 </svg>
               )}
               {/* 修复重复显示问题：只有 email 显示文本，其他平台只显示图标 */}
-              {link.platform === 'email' ? 'Email me' : (link.platform === 'github' ? 'GitHub' : '')}
+              {link.platform === 'email' ? <span data-i18n="about.emailMe">发邮件给我</span> : (link.platform === 'github' ? 'GitHub' : '')}
             </GlassButton>
           );
         })}
 
         <GlassButton variant="secondary" size="md" href="/projects">
-          View Projects
+          <span data-i18n="about.viewProjects">查看项目</span>
         </GlassButton>
       </div>
     </GlassCard>

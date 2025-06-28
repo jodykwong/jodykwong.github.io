@@ -1,11 +1,19 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import GlassCard from '../components/GlassCard.astro';
-import GlassButton from '../components/GlassButton.astro';
-import { getProjects } from '../lib/supabase';
-import { t } from '../lib/i18n';
+import Layout from '../../layouts/Layout.astro';
+import GlassCard from '../../components/GlassCard.astro';
+import GlassButton from '../../components/GlassButton.astro';
+import { getProjects } from '../../lib/supabase';
+import { t, type Language } from '../../lib/i18n';
 
-export const prerender = false; // 确保动态渲染
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'zh' } },
+    { params: { lang: 'en' } }
+  ];
+}
+
+const { lang } = Astro.params;
+const language: Language = lang === 'en' ? 'en-US' : 'zh-CN';
 
 // 从 Supabase 获取项目数据
 const projects = await getProjects();
@@ -13,9 +21,9 @@ const projects = await getProjects();
 // 状态映射函数
 function getStatusDisplay(status: string) {
   const statusMap = {
-    'active': t('projects.status.active'),
-    'maintained': t('projects.status.maintained'),
-    'archived': t('projects.status.archived')
+    'active': t('projects.status.active', language),
+    'maintained': t('projects.status.maintained', language),
+    'archived': t('projects.status.archived', language)
   };
   return statusMap[status as keyof typeof statusMap] || status;
 }
@@ -31,15 +39,15 @@ function getStatusStyle(status: string) {
 }
 ---
 
-<Layout title={`${t('projects.title')} | ${t('home.title')}`}>
+<Layout title={`${t('projects.title', language)} | ${t('home.title', language)}`} language={language}>
   <div class="max-w-4xl mx-auto">
     <!-- 页面标题 -->
     <GlassCard class="p-8 mb-8 text-center fade-in">
-      <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);" data-i18n="projects.title">
-        🚀 {t('projects.title')}
+      <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
+        🚀 {t('projects.title', language)}
       </h1>
-      <p class="text-lg" style="color: var(--text-secondary);" data-i18n="projects.description">
-        {t('projects.description')}
+      <p class="text-lg" style="color: var(--text-secondary);">
+        {t('projects.description', language)}
       </p>
     </GlassCard>
 
@@ -51,7 +59,7 @@ function getStatusStyle(status: string) {
           <div class="flex items-start justify-between mb-4">
             <h2 class="text-xl font-semibold">
               {project.slug ? (
-                <a href={`/projects/${project.slug}`} class="text-primary hover:text-blue-600 transition-colors">
+                <a href={`/${lang}/projects/${project.slug}`} class="text-primary hover:text-blue-600 transition-colors">
                   {project.title}
                 </a>
               ) : (
@@ -83,18 +91,18 @@ function getStatusStyle(status: string) {
 
           <div class="flex gap-2">
             {project.slug && (
-              <GlassButton variant="primary" size="sm" href={`/projects/${project.slug}`} data-i18n="projects.buttons.viewDetails">
-                {t('projects.buttons.viewDetails')}
+              <GlassButton variant="primary" size="sm" href={`/${lang}/projects/${project.slug}`}>
+                {t('projects.buttons.viewDetails', language)}
               </GlassButton>
             )}
             {project.url && (
-              <GlassButton variant="secondary" size="sm" href={project.url} data-i18n="projects.buttons.visitProject">
-                {t('projects.buttons.visitProject')}
+              <GlassButton variant="secondary" size="sm" href={project.url}>
+                {t('projects.buttons.visitProject', language)}
               </GlassButton>
             )}
             {project.github_url && (
-              <GlassButton variant="secondary" size="sm" href={project.github_url} data-i18n="projects.buttons.github">
-                {t('projects.buttons.github')}
+              <GlassButton variant="secondary" size="sm" href={project.github_url}>
+                {t('projects.buttons.github', language)}
               </GlassButton>
             )}
           </div>
@@ -105,29 +113,29 @@ function getStatusStyle(status: string) {
       <!-- 空状态 -->
       <GlassCard class="p-8 text-center">
         <div class="text-6xl mb-4">🚧</div>
-        <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);" data-i18n="projects.empty.title">
-          {t('projects.empty.title')}
+        <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
+          {t('projects.empty.title', language)}
         </h2>
-        <p style="color: var(--text-secondary); line-height: 1.6;" data-i18n="projects.empty.description">
-          {t('projects.empty.description')}
+        <p style="color: var(--text-secondary); line-height: 1.6;">
+          {t('projects.empty.description', language)}
         </p>
       </GlassCard>
     )}
 
     <!-- 合作邀请 -->
     <GlassCard class="p-8 mt-8 text-center slide-up" style="animation-delay: 300ms;">
-      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);" data-i18n="projects.collaboration.title">
-        💡 {t('projects.collaboration.title')}
+      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
+        💡 {t('projects.collaboration.title', language)}
       </h2>
-      <p class="mb-6" style="color: var(--text-secondary); line-height: 1.6;" data-i18n="projects.collaboration.description">
-        {t('projects.collaboration.description')}
+      <p class="mb-6" style="color: var(--text-secondary); line-height: 1.6;">
+        {t('projects.collaboration.description', language)}
       </p>
       <div class="flex justify-center gap-4">
-        <GlassButton variant="primary" size="lg" href="mailto:your@email.com" data-i18n="projects.collaboration.getInTouch">
-          {t('projects.collaboration.getInTouch')}
+        <GlassButton variant="primary" size="lg" href="mailto:jodykwong.minjie@gmail.com">
+          {t('projects.collaboration.getInTouch', language)}
         </GlassButton>
-        <GlassButton variant="secondary" size="lg" href="/about" data-i18n="projects.collaboration.aboutMe">
-          {t('projects.collaboration.aboutMe')}
+        <GlassButton variant="secondary" size="lg" href={`/${lang}/about`}>
+          {t('projects.collaboration.aboutMe', language)}
         </GlassButton>
       </div>
     </GlassCard>

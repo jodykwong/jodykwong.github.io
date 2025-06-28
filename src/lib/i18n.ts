@@ -21,6 +21,7 @@ const translations: Translations = {
       software: '软件',
       open: '仪表板',
       contact: '联系',
+      aboutMe: '关于我',
       loading: '加载中...',
       error: '出错了',
       success: '成功',
@@ -65,7 +66,11 @@ const translations: Translations = {
       fullProjectList: '完整项目列表',
       openDashboard: '项目仪表板',
       readWriting: '阅读我的文章',
-      viewSoftware: '查看软件项目'
+      viewSoftware: '查看软件项目',
+      bio: '我是一名软件开发者和创业者。我也偶尔写作。',
+      currentWorkContent: '最近我主要专注于构建产品和帮助其他创业者。我正在开发一个令人兴奋的SaaS产品，同时也在制作一些有用的工具。',
+      writingContent: '这个网站起源于我从日常工作中休假六个月，尝试推出一个盈利产品的经历。我在这里记录了那段旅程。我也偶尔写一些关于软件开发的文章。',
+      experienceContent: '从2015年到2023年，我担任Amazing Company的首席技术官，领导团队构建其旗舰产品：Awesome Product。现在我是该组织的顾问。'
     },
     about: {
       title: '关于我',
@@ -86,7 +91,18 @@ const translations: Translations = {
       other: '其他技能',
       getInTouch: '联系我',
       downloadResume: '下载简历',
-      currentFocus: '当前专注'
+      currentFocus: '当前专注',
+      backgroundContent1: '我是一名全栈开发者和创业者，专注于构建有意义的产品。从2015年开始，我一直在技术领域工作，积累了丰富的开发和团队管理经验。',
+      backgroundContent2: '我热衷于学习新技术，喜欢解决复杂的技术挑战，并且享受将想法转化为实际产品的过程。我相信技术应该服务于人，让生活变得更美好。',
+      currentFocusContent1: '目前我主要专注于全栈开发和产品设计，特别是在Web应用、移动应用和云服务方面。我正在探索AI和机器学习在产品开发中的应用。',
+      currentFocusContent2: '同时，我也在积极参与开源社区，分享我的经验和知识，帮助其他开发者成长。',
+      personal: '个人信息',
+      personalContent1: '除了编程，我还喜欢阅读、旅行和摄影。我相信保持工作与生活的平衡对于长期的创造力和幸福感非常重要。',
+      personalContent2: '我总是乐于与志同道合的人交流想法，如果你有有趣的项目或想法，欢迎随时联系我！',
+      connect: '联系我',
+      connectContent: '如果你想讨论项目合作、技术交流或者只是想打个招呼，我很乐意听到你的声音！',
+      emailMe: '发邮件给我',
+      viewProjects: '查看项目'
     },
     projects: {
       title: '项目展示',
@@ -107,6 +123,21 @@ const translations: Translations = {
         demo: '在线演示',
         source: '源代码',
         relatedProjects: '相关项目'
+      },
+      buttons: {
+        viewDetails: '查看详情',
+        visitProject: '访问项目',
+        github: 'GitHub'
+      },
+      empty: {
+        title: '暂无项目',
+        description: '项目正在添加中，请稍后查看我正在开发的内容！'
+      },
+      collaboration: {
+        title: '想要合作？',
+        description: '我总是对参与令人兴奋的项目感兴趣。如果您有想要讨论的想法，请随时联系我！',
+        getInTouch: '联系我',
+        aboutMe: '关于我'
       }
     },
     blog: {
@@ -214,6 +245,7 @@ const translations: Translations = {
       software: 'Software',
       open: 'Dashboard',
       contact: 'Contact',
+      aboutMe: 'About Me',
       loading: 'Loading...',
       error: 'Error',
       success: 'Success',
@@ -258,7 +290,11 @@ const translations: Translations = {
       fullProjectList: 'Full Project List',
       openDashboard: 'Project Dashboard',
       readWriting: 'Read My Writing',
-      viewSoftware: 'View Software Projects'
+      viewSoftware: 'View Software Projects',
+      bio: 'I\'m a software developer and entrepreneur. I also write occasionally.',
+      currentWorkContent: 'Recently I\'ve been mainly focused on building products and helping other entrepreneurs. I\'m developing an exciting SaaS product while also creating some useful tools.',
+      writingContent: 'This website originated from my experience taking a six-month break from my day job to try launching a profitable product. I documented that journey here. I also occasionally write about software development.',
+      experienceContent: 'From 2015 to 2023, I served as CTO of Amazing Company, leading the team to build their flagship product: Awesome Product. I\'m now an advisor to the organization.'
     },
     about: {
       title: 'About Me',
@@ -279,7 +315,18 @@ const translations: Translations = {
       other: 'Other Skills',
       getInTouch: 'Get in Touch',
       downloadResume: 'Download Resume',
-      currentFocus: 'Current Focus'
+      currentFocus: 'Current Focus',
+      backgroundContent1: 'I\'m a full-stack developer and entrepreneur focused on building meaningful products. Since 2015, I\'ve been working in the tech industry, accumulating rich experience in development and team management.',
+      backgroundContent2: 'I\'m passionate about learning new technologies, enjoy solving complex technical challenges, and love the process of turning ideas into actual products. I believe technology should serve people and make life better.',
+      currentFocusContent1: 'Currently, I\'m mainly focused on full-stack development and product design, particularly in web applications, mobile apps, and cloud services. I\'m exploring the application of AI and machine learning in product development.',
+      currentFocusContent2: 'At the same time, I\'m actively participating in the open source community, sharing my experience and knowledge to help other developers grow.',
+      personal: 'Personal',
+      personalContent1: 'Besides programming, I also enjoy reading, traveling, and photography. I believe maintaining work-life balance is crucial for long-term creativity and happiness.',
+      personalContent2: 'I\'m always happy to exchange ideas with like-minded people. If you have interesting projects or ideas, feel free to contact me anytime!',
+      connect: 'Let\'s Connect',
+      connectContent: 'If you want to discuss project collaboration, technical exchange, or just say hello, I\'d love to hear from you!',
+      emailMe: 'Email Me',
+      viewProjects: 'View Projects'
     },
     projects: {
       title: 'Projects',
@@ -300,6 +347,21 @@ const translations: Translations = {
         demo: 'Live Demo',
         source: 'Source Code',
         relatedProjects: 'Related Projects'
+      },
+      buttons: {
+        viewDetails: 'View Details',
+        visitProject: 'Visit Project',
+        github: 'GitHub'
+      },
+      empty: {
+        title: 'No Projects Yet',
+        description: 'Projects are being added soon. Check back later to see what I\'m working on!'
+      },
+      collaboration: {
+        title: 'Want to collaborate?',
+        description: 'I\'m always interested in working on exciting projects. If you have an idea you\'d like to discuss, feel free to reach out!',
+        getInTouch: 'Get in touch',
+        aboutMe: 'About Me'
       }
     },
     blog: {
@@ -458,6 +520,21 @@ export function initLanguage(): Language {
   return currentLanguage;
 }
 
+// 从URL路径获取语言
+export function getLanguageFromUrl(url: string): Language {
+  const pathSegments = url.split('/').filter(segment => segment.length > 0);
+  const firstSegment = pathSegments[0];
+
+  if (firstSegment === 'zh' || firstSegment === 'zh-CN') {
+    return 'zh-CN';
+  } else if (firstSegment === 'en' || firstSegment === 'en-US') {
+    return 'en-US';
+  }
+
+  // 默认返回中文
+  return 'zh-CN';
+}
+
 // 获取翻译文本
 export function t(key: string, language?: Language, params?: Record<string, string>): string {
   const lang = language || currentLanguage;
@@ -487,6 +564,46 @@ export function t(key: string, language?: Language, params?: Record<string, stri
   }
 
   return result;
+}
+
+// 生成带语言前缀的URL
+export function getLocalizedUrl(path: string, language: Language): string {
+  // 移除开头的斜杠
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+
+  // 移除现有的语言前缀
+  const pathWithoutLang = cleanPath.replace(/^(zh|en|zh-CN|en-US)\/?/, '');
+
+  // 生成语言前缀
+  const langPrefix = language === 'zh-CN' ? 'zh' : 'en';
+
+  // 构建新的URL
+  if (pathWithoutLang === '' || pathWithoutLang === '/' || pathWithoutLang === 'index') {
+    return `/${langPrefix}`;
+  }
+
+  return `/${langPrefix}/${pathWithoutLang}`;
+}
+
+// 获取当前页面的其他语言版本URL
+export function getAlternateLanguageUrl(currentUrl: string, targetLanguage: Language): string {
+  const currentLang = getLanguageFromUrl(currentUrl);
+  if (currentLang === targetLanguage) {
+    return currentUrl;
+  }
+
+  // 移除当前语言前缀，然后添加目标语言前缀
+  const pathWithoutLang = currentUrl.replace(/^\/(zh|en|zh-CN|en-US)\/?/, '');
+
+  // 生成目标语言前缀
+  const targetLangPrefix = targetLanguage === 'zh-CN' ? 'zh' : 'en';
+
+  // 构建新的URL
+  if (pathWithoutLang === '' || pathWithoutLang === '/' || pathWithoutLang === 'index') {
+    return `/${targetLangPrefix}`;
+  }
+
+  return `/${targetLangPrefix}/${pathWithoutLang}`;
 }
 
 // 获取所有支持的语言

@@ -1,121 +1,35 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import GlassCard from '../components/GlassCard.astro';
-import GlassButton from '../components/GlassButton.astro';
-import { getPersonalInfo, getProfileContentBySection } from '../lib/supabase';
+// 根目录重定向到默认语言
+export const prerender = false;
 
-export const prerender = false; // 确保动态渲染
-
-// 获取个人信息和内容
-const personalInfo = await getPersonalInfo();
-const currentFocusContent = await getProfileContentBySection('current_focus');
-const writingContent = await getProfileContentBySection('writing_sharing');
-const experienceContent = await getProfileContentBySection('experience');
-
-// 默认值
-const defaultPersonalInfo = {
-  name: "Your Name",
-  title: "Full-Stack Developer, Maker of Products, and Solopreneur",
-  bio: "I'm a software developer and entrepreneur. I also write occasionally.",
-  avatar_url: "/images/avatar.jpg"
-};
-
-const defaultCurrentFocus = "These days I mostly work on My SaaS Product: the amazing boilerplate. I also made My Cool App—what I hope is the best way to solve a specific problem on the internet.";
-const defaultWriting = "This site originated during a six-month sabbatical I took from my day job where I tried to launch a profitable product. I documented that journey here. I also write occasionally about building software.";
-const defaultExperience = "From 2015-2023 I served as CTO of Amazing Company and led the team that builds its flagship product: Awesome Product. I'm now an advisor to the organization.";
-
-// 使用数据库内容或默认值
-const displayInfo = personalInfo || defaultPersonalInfo;
-const displayCurrentFocus = currentFocusContent?.content || defaultCurrentFocus;
-const displayWriting = writingContent?.content || defaultWriting;
-const displayExperience = experienceContent?.content || defaultExperience;
+// 简单重定向到中文版本（默认语言）
+return Astro.redirect('/zh');
 ---
 
-<Layout title={`${displayInfo.name} | ${displayInfo.title}`}>
-  <div class="max-w-4xl mx-auto">
-    <!-- 主要介绍卡片 -->
-    <GlassCard class="p-8 mb-8 fade-in">
-      <div class="flex flex-col md:flex-row items-start gap-8">
-        <div class="flex-shrink-0">
-          <div class="relative">
-            <img
-              src={displayInfo.avatar_url}
-              alt={`Hi, I'm ${displayInfo.name}`}
-              class="w-32 h-32 rounded-full object-cover"
-              style="border: 3px solid var(--border-light); box-shadow: var(--shadow-glass);"
-            />
-            <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white" style="border-color: var(--bg-primary);"></div>
-          </div>
-        </div>
-
-        <div class="flex-1">
-          <h1 class="text-4xl md:text-5xl font-bold mb-4" style="color: var(--text-primary);"
-              data-i18n="home.greeting"
-              data-i18n-params={JSON.stringify({name: displayInfo.name})}>
-            你好，我是 {displayInfo.name}。
-          </h1>
-          <p class="text-xl mb-6" style="color: var(--text-secondary);">
-            {displayInfo.bio}
-          </p>
-          <div class="flex flex-wrap gap-3">
-            <GlassButton variant="primary" size="md" href="/projects">
-              <span data-i18n="home.viewProjects">查看项目</span>
-            </GlassButton>
-            <GlassButton variant="secondary" size="md" href="/about">
-              <span data-i18n="home.aboutMe">关于我</span>
-            </GlassButton>
-          </div>
-        </div>
-      </div>
-    </GlassCard>
-
-    <!-- 内容区域 -->
-    <div class="grid gap-6">
-      <!-- 当前工作 -->
-      <GlassCard class="p-6 slide-up">
-        <h2 class="text-2xl font-bold mb-4" style="color: var(--text-primary);" data-i18n="home.currentWork">
-          🚀 当前工作
-        </h2>
-        <p class="mb-4" style="color: var(--text-secondary); line-height: 1.7;" set:html={displayCurrentFocus}>
-        </p>
-        <div class="flex flex-wrap gap-2">
-          <GlassButton variant="secondary" size="sm" href="/projects">
-            <span data-i18n="home.fullProjectList">完整项目列表</span>
-          </GlassButton>
-          <GlassButton variant="secondary" size="sm" href="/open">
-            <span data-i18n="home.openDashboard">项目仪表板</span>
-          </GlassButton>
-        </div>
-      </GlassCard>
-
-      <!-- 写作和分享 -->
-      <GlassCard class="p-6 slide-up" style="animation-delay: 100ms;">
-        <h2 class="text-2xl font-bold mb-4" style="color: var(--text-primary);" data-i18n="home.writingSharing">
-          ✍️ 写作分享
-        </h2>
-        <p class="mb-4" style="color: var(--text-secondary); line-height: 1.7;" set:html={displayWriting}>
-        </p>
-        <div class="flex flex-wrap gap-2">
-          <GlassButton variant="secondary" size="sm" href="/writing">
-            <span data-i18n="home.readWriting">阅读我的文章</span>
-          </GlassButton>
-          <GlassButton variant="secondary" size="sm" href="/software">
-            <span data-i18n="home.viewSoftware">查看软件项目</span>
-          </GlassButton>
-        </div>
-      </GlassCard>
-
-      <!-- 经验背景 -->
-      <GlassCard class="p-6 slide-up" style="animation-delay: 200ms;">
-        <h2 class="text-2xl font-bold mb-4" style="color: var(--text-primary);" data-i18n="home.experience">
-          💼 工作经历
-        </h2>
-        <p class="mb-4" style="color: var(--text-secondary); line-height: 1.7;" set:html={displayExperience}>
-        </p>
-        <GlassButton variant="secondary" size="sm" href="/about">
-          <span data-i18n="home.aboutMe">关于我</span>
-        </GlassButton>
-      </GlassCard>
-    </div>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jody Kwong - 重定向中...</title>
+  <script>
+    // 客户端重定向作为备用方案
+    (function() {
+      const userLang = navigator.language || 'en';
+      const isChinesePreferred = userLang.includes('zh');
+      const redirectUrl = isChinesePreferred ? '/zh' : '/en';
+      window.location.href = redirectUrl;
+    })();
+  </script>
+</head>
+<body>
+  <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+    <h1>重定向中... / Redirecting...</h1>
+    <p>正在跳转到合适的语言版本... / Redirecting to the appropriate language version...</p>
+    <p>
+      <a href="/zh">中文</a> |
+      <a href="/en">English</a>
+    </p>
   </div>
-</Layout>
+</body>
+</html>

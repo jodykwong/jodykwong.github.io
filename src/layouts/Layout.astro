@@ -1,8 +1,8 @@
 ---
 import ThemeToggle from '../components/ThemeToggle.astro';
-import LanguageSwitch from '../components/i18n/LanguageSwitch.astro';
+import LanguageSwitch from '../components/i18n/LanguageSwitchNew.astro';
 import { getPersonalInfo, getSocialLinks } from '../lib/supabase';
-import { getCurrentLanguage, t } from '../lib/i18n';
+import { t, type Language } from '../lib/i18n';
 import '../styles/glassmorphism.css';
 
 export const prerender = false; // 确保服务器端渲染
@@ -10,24 +10,26 @@ export const prerender = false; // 确保服务器端渲染
 export interface Props {
   title: string;
   description?: string;
+  language?: Language;
 }
 
-const { title, description } = Astro.props;
+const { title, description, language = 'zh-CN' } = Astro.props;
 
-// 获取当前语言（服务器端使用默认值，客户端会通过脚本更新）
-const currentLanguage = 'zh-CN'; // 默认语言，客户端会动态更新
+// 使用传入的语言参数
+const currentLanguage = language;
 
 // 获取个人信息用于导航栏和页脚
 const personalInfo = await getPersonalInfo();
-const displayName = personalInfo?.name || t('home.title');
+const displayName = personalInfo?.name || t('home.title', currentLanguage);
 
 // 获取社交媒体链接
 const socialLinks = await getSocialLinks();
 
 // 多语言描述
-const defaultDescription = description || t('home.description');
+const defaultDescription = description || t('home.description', currentLanguage);
 
-// 调试信息
+// 获取语言前缀用于导航链接
+const langPrefix = currentLanguage === 'zh-CN' ? 'zh' : 'en';
 
 ---
 
@@ -97,11 +99,7 @@ const defaultDescription = description || t('home.description');
       })();
     </script>
 
-    <!-- 客户端翻译脚本 -->
-    <script src="/scripts/client-i18n.js" is:inline></script>
-
-    <!-- 语言切换功能脚本 -->
-    <script src="/scripts/language-switch.js" is:inline></script>
+    <!-- 基于URL的多语言方案，不需要客户端翻译脚本 -->
   </head>
   <body>
     <header class="navbar">
@@ -112,21 +110,21 @@ const defaultDescription = description || t('home.description');
           </a>
 
           <div class="hidden md:flex items-center space-x-6">
-            <a href="/" class="hover:text-primary transition-colors" data-i18n="nav.home">首页</a>
-            <a href="/projects" class="hover:text-primary transition-colors" data-i18n="nav.projects">项目</a>
-            <a href="/writing" class="hover:text-primary transition-colors" data-i18n="nav.writing">写作</a>
-            <a href="/software" class="hover:text-primary transition-colors" data-i18n="nav.software">软件</a>
-            <a href="/open" class="hover:text-primary transition-colors" data-i18n="nav.open">仪表板</a>
-            <a href="/about" class="hover:text-primary transition-colors" data-i18n="nav.about">关于</a>
-            <LanguageSwitch variant="toggle" showLabel={false} />
+            <a href={`/${langPrefix}`} class="hover:text-primary transition-colors">{t('common.home', currentLanguage)}</a>
+            <a href={`/${langPrefix}/projects`} class="hover:text-primary transition-colors">{t('common.projects', currentLanguage)}</a>
+            <a href={`/${langPrefix}/writing`} class="hover:text-primary transition-colors">{t('common.writing', currentLanguage)}</a>
+            <a href={`/${langPrefix}/software`} class="hover:text-primary transition-colors">{t('common.software', currentLanguage)}</a>
+            <a href={`/${langPrefix}/open`} class="hover:text-primary transition-colors">{t('common.open', currentLanguage)}</a>
+            <a href={`/${langPrefix}/about`} class="hover:text-primary transition-colors">{t('common.about', currentLanguage)}</a>
+            <LanguageSwitch variant="toggle" showLabel={false} currentLanguage={currentLanguage} />
             <ThemeToggle />
           </div>
 
           <div class="flex items-center space-x-4 md:hidden">
-            <LanguageSwitch variant="toggle" showLabel={false} />
+            <LanguageSwitch variant="toggle" showLabel={false} currentLanguage={currentLanguage} />
             <ThemeToggle />
             <button class="theme-toggle" id="mobile-menu-button">
-              <span class="sr-only">{t('navigation.menu')}</span>
+              <span class="sr-only">{t('navigation.menu', currentLanguage)}</span>
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
               </svg>
@@ -136,12 +134,12 @@ const defaultDescription = description || t('home.description');
 
         <div class="md:hidden mt-4 hidden glass" id="mobile-menu" style="border-radius: var(--radius-xl); padding: 16px; margin-top: 16px;">
           <div class="flex flex-col space-y-3">
-            <a href="/" class="hover:text-primary transition-colors py-2" data-i18n="nav.home">首页</a>
-            <a href="/projects" class="hover:text-primary transition-colors py-2" data-i18n="nav.projects">项目</a>
-            <a href="/writing" class="hover:text-primary transition-colors py-2" data-i18n="nav.writing">写作</a>
-            <a href="/software" class="hover:text-primary transition-colors py-2" data-i18n="nav.software">软件</a>
-            <a href="/open" class="hover:text-primary transition-colors py-2" data-i18n="nav.open">仪表板</a>
-            <a href="/about" class="hover:text-primary transition-colors py-2" data-i18n="nav.about">关于</a>
+            <a href={`/${langPrefix}`} class="hover:text-primary transition-colors py-2">{t('common.home', currentLanguage)}</a>
+            <a href={`/${langPrefix}/projects`} class="hover:text-primary transition-colors py-2">{t('common.projects', currentLanguage)}</a>
+            <a href={`/${langPrefix}/writing`} class="hover:text-primary transition-colors py-2">{t('common.writing', currentLanguage)}</a>
+            <a href={`/${langPrefix}/software`} class="hover:text-primary transition-colors py-2">{t('common.software', currentLanguage)}</a>
+            <a href={`/${langPrefix}/open`} class="hover:text-primary transition-colors py-2">{t('common.open', currentLanguage)}</a>
+            <a href={`/${langPrefix}/about`} class="hover:text-primary transition-colors py-2">{t('common.about', currentLanguage)}</a>
           </div>
         </div>
       </nav>

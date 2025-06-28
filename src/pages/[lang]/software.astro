@@ -1,0 +1,52 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import GlassCard from '../../components/GlassCard.astro';
+import GlassButton from '../../components/GlassButton.astro';
+import { t, type Language } from '../../lib/i18n';
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'zh' } },
+    { params: { lang: 'en' } }
+  ];
+}
+
+const { lang } = Astro.params;
+const language: Language = lang === 'en' ? 'en-US' : 'zh-CN';
+---
+
+<Layout title={`${t('software.title', language)} | ${t('home.title', language)}`} language={language}>
+  <div class="max-w-4xl mx-auto">
+    <!-- 页面标题 -->
+    <GlassCard class="p-8 mb-8 text-center fade-in">
+      <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
+        💻 {t('software.title', language)}
+      </h1>
+      <p class="text-lg" style="color: var(--text-secondary);">
+        {t('software.description', language)}
+      </p>
+    </GlassCard>
+
+    <!-- 开发中 -->
+    <GlassCard class="p-8 text-center">
+      <div class="text-6xl mb-4">🚧</div>
+      <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
+        {language === 'zh-CN' ? '内容开发中' : 'Under Development'}
+      </h2>
+      <p class="mb-6" style="color: var(--text-secondary); line-height: 1.6;">
+        {language === 'zh-CN' 
+          ? '我正在整理关于软件开发的思考和经验。敬请期待！' 
+          : 'I\'m organizing my thoughts and experiences about software development. Stay tuned!'
+        }
+      </p>
+      <div class="flex justify-center gap-4">
+        <GlassButton variant="primary" size="lg" href={`/${lang}/projects`}>
+          {t('home.viewProjects', language)}
+        </GlassButton>
+        <GlassButton variant="secondary" size="lg" href={`/${lang}/about`}>
+          {t('common.aboutMe', language)}
+        </GlassButton>
+      </div>
+    </GlassCard>
+  </div>
+</Layout>
