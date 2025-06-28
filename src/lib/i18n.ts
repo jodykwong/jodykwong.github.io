@@ -19,7 +19,7 @@ const translations: Translations = {
       projects: '项目',
       writing: '写作',
       software: '软件',
-      open: '开源',
+      open: '仪表板',
       contact: '联系',
       loading: '加载中...',
       error: '出错了',
@@ -63,7 +63,7 @@ const translations: Translations = {
       writingSharing: '✍️ 写作分享',
       experience: '💼 工作经历',
       fullProjectList: '完整项目列表',
-      openDashboard: '开源项目仪表板',
+      openDashboard: '项目仪表板',
       readWriting: '阅读我的文章',
       viewSoftware: '查看软件项目'
     },
@@ -198,8 +198,8 @@ const translations: Translations = {
       devopsDeployment: 'DevOps 与部署'
     },
     open: {
-      title: '开源项目',
-      description: '我的开源项目仪表板，展示正在进行的项目和贡献。',
+      title: '项目仪表板',
+      description: '我的项目仪表板，展示正在进行的项目和贡献。',
       dashboard: '项目仪表板',
       contributions: '贡献统计',
       repositories: '代码仓库'
@@ -212,7 +212,7 @@ const translations: Translations = {
       projects: 'Projects',
       writing: 'Writing',
       software: 'Software',
-      open: 'Open',
+      open: 'Dashboard',
       contact: 'Contact',
       loading: 'Loading...',
       error: 'Error',
@@ -256,7 +256,7 @@ const translations: Translations = {
       writingSharing: '✍️ Writing & Sharing',
       experience: '💼 Experience',
       fullProjectList: 'Full Project List',
-      openDashboard: 'Open Startup Dashboard',
+      openDashboard: 'Project Dashboard',
       readWriting: 'Read My Writing',
       viewSoftware: 'View Software Projects'
     },
@@ -391,8 +391,8 @@ const translations: Translations = {
       devopsDeployment: 'DevOps & Deployment'
     },
     open: {
-      title: 'Open Projects',
-      description: 'My open source project dashboard, showcasing ongoing projects and contributions.',
+      title: 'Project Dashboard',
+      description: 'My project dashboard, showcasing ongoing projects and contributions.',
       dashboard: 'Project Dashboard',
       contributions: 'Contributions',
       repositories: 'Repositories'
@@ -405,6 +405,14 @@ let currentLanguage: Language = 'zh-CN';
 
 // 获取当前语言
 export function getCurrentLanguage(): Language {
+  // 在浏览器环境中，尝试从 localStorage 读取
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('preferred-language') as Language;
+    if (saved && (saved === 'zh-CN' || saved === 'en-US')) {
+      currentLanguage = saved;
+      return saved;
+    }
+  }
   return currentLanguage;
 }
 

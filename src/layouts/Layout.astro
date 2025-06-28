@@ -14,8 +14,8 @@ export interface Props {
 
 const { title, description } = Astro.props;
 
-// 获取当前语言
-const currentLanguage = getCurrentLanguage();
+// 获取当前语言（服务器端使用默认值，客户端会通过脚本更新）
+const currentLanguage = 'zh-CN'; // 默认语言，客户端会动态更新
 
 // 获取个人信息用于导航栏和页脚
 const personalInfo = await getPersonalInfo();
@@ -63,15 +63,23 @@ const defaultDescription = description || t('home.description');
       // 初始化语言设置
       (function() {
         const savedLanguage = localStorage.getItem('preferred-language');
-        if (savedLanguage) {
+        if (savedLanguage && (savedLanguage === 'zh-CN' || savedLanguage === 'en-US')) {
           document.documentElement.lang = savedLanguage;
+          // 设置全局变量供其他脚本使用
+          window.currentLanguage = savedLanguage;
         } else {
           // 从浏览器语言检测
           const browserLang = navigator.language;
           const language = browserLang.startsWith('zh') ? 'zh-CN' : 'en-US';
           localStorage.setItem('preferred-language', language);
           document.documentElement.lang = language;
+          window.currentLanguage = language;
         }
+
+        // 监听语言变更事件
+        window.addEventListener('languageChanged', function(e) {
+          window.currentLanguage = e.detail.language;
+        });
       })();
     </script>
 
@@ -85,6 +93,9 @@ const defaultDescription = description || t('home.description');
         }
       })();
     </script>
+
+    <!-- 语言切换功能脚本 -->
+    <script src="/scripts/language-switch.js" is:inline></script>
   </head>
   <body>
     <header class="navbar">
