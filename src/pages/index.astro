@@ -1,9 +1,6 @@
 ---
-// 根目录重定向到默认语言
-export const prerender = false;
-
-// 简单重定向到中文版本（默认语言）
-return Astro.redirect('/zh');
+// 根目录重定向页面 - 静态生成兼容
+// 在静态环境中，我们使用客户端重定向
 ---
 
 <!DOCTYPE html>
@@ -13,11 +10,25 @@ return Astro.redirect('/zh');
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jody Kwong - 重定向中...</title>
   <script>
-    // 客户端重定向作为备用方案
+    // 客户端重定向 - 支持静态部署
     (function() {
+      // 检查是否已经在语言路径中
+      if (window.location.pathname.match(/^\/(zh|en)/)) {
+        return; // 已经在正确的语言路径中
+      }
+
+      // 检测用户语言偏好
       const userLang = navigator.language || 'en';
-      const isChinesePreferred = userLang.includes('zh');
-      const redirectUrl = isChinesePreferred ? '/zh' : '/en';
+      const isChinesePreferred = userLang.toLowerCase().includes('zh');
+
+      // 构建重定向URL，考虑GitHub Pages的base路径
+      const basePath = document.querySelector('base')?.getAttribute('href') || '/';
+      const redirectPath = isChinesePreferred ? 'zh' : 'en';
+      const redirectUrl = basePath.endsWith('/')
+        ? basePath + redirectPath
+        : basePath + '/' + redirectPath;
+
+      // 执行重定向
       window.location.href = redirectUrl;
     })();
   </script>
@@ -27,8 +38,8 @@ return Astro.redirect('/zh');
     <h1>重定向中... / Redirecting...</h1>
     <p>正在跳转到合适的语言版本... / Redirecting to the appropriate language version...</p>
     <p>
-      <a href="/zh">中文</a> |
-      <a href="/en">English</a>
+      <a href="./zh">中文</a> |
+      <a href="./en">English</a>
     </p>
   </div>
 </body>
