@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import GlassCard from '../components/GlassCard.astro';
 import GlassButton from '../components/GlassButton.astro';
+import { t, formatNumber } from '../lib/i18n';
 
 // Mock data - in a real app, this would come from Supabase
 const metrics = {
@@ -58,16 +59,15 @@ function formatDate(dateString: string) {
 }
 ---
 
-<Layout title="Open Project Dashboard | Your Name">
+<Layout title={`${t('open.title')} | ${t('home.title')}`}>
   <div class="max-w-4xl mx-auto">
     <!-- 页面标题 -->
     <GlassCard class="p-8 mb-8 text-center fade-in">
       <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
-        📊 Open Project Dashboard
+        📊 {t('open.title')}
       </h1>
       <p class="text-lg" style="color: var(--text-secondary);">
-        I believe in transparency and sharing the journey of building products.
-        Here's a real-time look at the metrics and progress of my main project.
+        {t('open.description')}
       </p>
     </GlassCard>
 

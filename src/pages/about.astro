@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import GlassCard from '../components/GlassCard.astro';
 import GlassButton from '../components/GlassButton.astro';
 import { getAllProfileContent, getPersonalInfo, getAllSocialLinks } from '../lib/supabase';
+import { t } from '../lib/i18n';
 
 export const prerender = false;
 
@@ -31,22 +32,22 @@ const formatSkills = (skillString: string): string[] => {
 };
 ---
 
-<Layout title="About | Your Name">
+<Layout title={`${t('about.title')} | ${t('home.title')}`}>
   <div class="max-w-4xl mx-auto">
     <!-- 页面标题 -->
     <GlassCard class="p-8 mb-8 text-center fade-in">
       <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
-        👋 About Me
+        👋 {t('about.title')}
       </h1>
       <p class="text-xl" style="color: var(--text-secondary);">
-        I'm a full-stack developer and entrepreneur passionate about building products that solve real problems.
+        {t('about.subtitle')}
       </p>
     </GlassCard>
 
     <!-- 背景介绍 -->
     <GlassCard class="p-6 mb-6 slide-up">
       <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
-        🚀 Background
+        🚀 {t('about.background')}
       </h2>
       <div style="color: var(--text-secondary); line-height: 1.7;">
         <p class="mb-4">
@@ -67,7 +68,7 @@ const formatSkills = (skillString: string): string[] => {
     <!-- 当前专注 -->
     <GlassCard class="p-6 mb-6 slide-up" style="animation-delay: 100ms;">
       <h2 class="text-2xl font-semibold mb-4" style="color: var(--text-primary);">
-        🎯 Current Focus
+        🎯 {t('about.currentFocus')}
       </h2>
       <div style="color: var(--text-secondary); line-height: 1.7;">
         <p class="mb-4">
@@ -87,11 +88,11 @@ const formatSkills = (skillString: string): string[] => {
     <!-- 技术技能 -->
     <GlassCard class="p-6 mb-6 slide-up" style="animation-delay: 200ms;">
       <h2 class="text-2xl font-semibold mb-6" style="color: var(--text-primary);">
-        💻 Technical Skills
+        💻 {t('about.technicalSkills')}
       </h2>
       <div class="grid md:grid-cols-2 gap-6">
         <div class="glass-subtle p-4 rounded-xl">
-          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">Frontend</h3>
+          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">{t('about.frontend')}</h3>
           <ul class="space-y-2" style="color: var(--text-secondary);">
             {formatSkills(skills.frontend).map((skill: string) => (
               <li>• {skill}</li>
@@ -100,7 +101,7 @@ const formatSkills = (skillString: string): string[] => {
         </div>
 
         <div class="glass-subtle p-4 rounded-xl">
-          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">Backend</h3>
+          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">{t('about.backend')}</h3>
           <ul class="space-y-2" style="color: var(--text-secondary);">
             {formatSkills(skills.backend).map((skill: string) => (
               <li>• {skill}</li>
@@ -109,7 +110,7 @@ const formatSkills = (skillString: string): string[] => {
         </div>
 
         <div class="glass-subtle p-4 rounded-xl">
-          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">DevOps & Tools</h3>
+          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">{t('about.devops')}</h3>
           <ul class="space-y-2" style="color: var(--text-secondary);">
             {formatSkills(skills.devops).map((skill: string) => (
               <li>• {skill}</li>
@@ -118,7 +119,7 @@ const formatSkills = (skillString: string): string[] => {
         </div>
 
         <div class="glass-subtle p-4 rounded-xl">
-          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">Other</h3>
+          <h3 class="font-semibold mb-3" style="color: var(--text-primary);">{t('about.other')}</h3>
           <ul class="space-y-2" style="color: var(--text-secondary);">
             {formatSkills(skills.other).map((skill: string) => (
               <li>• {skill}</li>

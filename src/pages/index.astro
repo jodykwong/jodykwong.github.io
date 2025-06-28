@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import GlassCard from '../components/GlassCard.astro';
 import GlassButton from '../components/GlassButton.astro';
 import { getPersonalInfo, getProfileContentBySection } from '../lib/supabase';
+import { t } from '../lib/i18n';
 
 export const prerender = false; // 确保动态渲染
 
@@ -50,17 +51,17 @@ const displayExperience = experienceContent?.content || defaultExperience;
 
         <div class="flex-1">
           <h1 class="text-4xl md:text-5xl font-bold mb-4" style="color: var(--text-primary);">
-            Hi, I'm {displayInfo.name}.
+            {t('home.greeting').replace('{name}', displayInfo.name)}
           </h1>
           <p class="text-xl mb-6" style="color: var(--text-secondary);">
             {displayInfo.bio}
           </p>
           <div class="flex flex-wrap gap-3">
             <GlassButton variant="primary" size="md" href="/projects">
-              View Projects
+              {t('home.viewProjects')}
             </GlassButton>
             <GlassButton variant="secondary" size="md" href="/about">
-              About Me
+              {t('home.aboutMe')}
             </GlassButton>
           </div>
         </div>
@@ -72,16 +73,16 @@ const displayExperience = experienceContent?.content || defaultExperience;
       <!-- 当前工作 -->
       <GlassCard class="p-6 slide-up">
         <h2 class="text-2xl font-bold mb-4" style="color: var(--text-primary);">
-          🚀 What I'm Working On
+          {t('home.currentWork')}
         </h2>
         <p class="mb-4" style="color: var(--text-secondary); line-height: 1.7;" set:html={displayCurrentFocus}>
         </p>
         <div class="flex flex-wrap gap-2">
           <GlassButton variant="secondary" size="sm" href="/projects">
-            Full Project List
+            {t('home.fullProjectList')}
           </GlassButton>
           <GlassButton variant="secondary" size="sm" href="/open">
-            Open Startup Dashboard
+            {t('home.openDashboard')}
           </GlassButton>
         </div>
       </GlassCard>
@@ -89,16 +90,16 @@ const displayExperience = experienceContent?.content || defaultExperience;
       <!-- 写作和分享 -->
       <GlassCard class="p-6 slide-up" style="animation-delay: 100ms;">
         <h2 class="text-2xl font-bold mb-4" style="color: var(--text-primary);">
-          ✍️ Writing & Sharing
+          {t('home.writingSharing')}
         </h2>
         <p class="mb-4" style="color: var(--text-secondary); line-height: 1.7;" set:html={displayWriting}>
         </p>
         <div class="flex flex-wrap gap-2">
           <GlassButton variant="secondary" size="sm" href="/writing">
-            Read My Writing
+            {t('home.readWriting')}
           </GlassButton>
           <GlassButton variant="secondary" size="sm" href="/software">
-            On Software
+            {t('home.viewSoftware')}
           </GlassButton>
         </div>
       </GlassCard>
@@ -106,12 +107,12 @@ const displayExperience = experienceContent?.content || defaultExperience;
       <!-- 经验背景 -->
       <GlassCard class="p-6 slide-up" style="animation-delay: 200ms;">
         <h2 class="text-2xl font-bold mb-4" style="color: var(--text-primary);">
-          💼 Experience
+          {t('home.experience')}
         </h2>
         <p class="mb-4" style="color: var(--text-secondary); line-height: 1.7;" set:html={displayExperience}>
         </p>
         <GlassButton variant="secondary" size="sm" href="/about">
-          Learn More About Me
+          {t('home.aboutMe')}
         </GlassButton>
       </GlassCard>
     </div>

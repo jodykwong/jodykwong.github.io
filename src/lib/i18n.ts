@@ -53,13 +53,24 @@ const translations: Translations = {
       title: 'Jody Kwong',
       subtitle: '全栈开发者 & 创业者',
       description: '热爱技术，专注于构建优秀的产品和用户体验',
+      greeting: '你好，我是 {name}。',
       getInTouch: '联系我',
       viewProjects: '查看项目',
+      aboutMe: '关于我',
       latestPosts: '最新文章',
-      featuredProjects: '精选项目'
+      featuredProjects: '精选项目',
+      currentWork: '🚀 当前工作',
+      writingSharing: '✍️ 写作分享',
+      experience: '💼 工作经历',
+      fullProjectList: '完整项目列表',
+      openDashboard: '开源项目仪表板',
+      readWriting: '阅读我的文章',
+      viewSoftware: '查看软件项目'
     },
     about: {
       title: '关于我',
+      subtitle: '我是一名全栈开发者和创业者，热衷于构建解决实际问题的产品。',
+      background: '背景介绍',
       introduction: '个人介绍',
       skills: '技能专长',
       experience: '工作经历',
@@ -68,7 +79,14 @@ const translations: Translations = {
       technicalSkills: '技术技能',
       softSkills: '软技能',
       languages: '语言能力',
-      hobbies: '兴趣爱好'
+      hobbies: '兴趣爱好',
+      frontend: '前端开发',
+      backend: '后端开发',
+      devops: '运维部署',
+      other: '其他技能',
+      getInTouch: '联系我',
+      downloadResume: '下载简历',
+      currentFocus: '当前专注'
     },
     projects: {
       title: '项目展示',
@@ -105,7 +123,7 @@ const translations: Translations = {
       sharePost: '分享文章',
       noPostsFound: '没有找到相关文章',
       searchPlaceholder: '搜索文章标题、内容或标签...',
-      categories: {
+      categoryTypes: {
         tech: '技术分享',
         product: '产品开发',
         startup: '创业心得',
@@ -171,6 +189,20 @@ const translations: Translations = {
         delete: '确定要删除吗？此操作不可撤销。',
         unsaved: '有未保存的更改，确定要离开吗？'
       }
+    },
+    software: {
+      title: '软件开发',
+      description: '分享我在软件开发过程中的思考、经验和最佳实践。',
+      webDevelopment: 'Web 开发',
+      backendDevelopment: '后端开发',
+      devopsDeployment: 'DevOps 与部署'
+    },
+    open: {
+      title: '开源项目',
+      description: '我的开源项目仪表板，展示正在进行的项目和贡献。',
+      dashboard: '项目仪表板',
+      contributions: '贡献统计',
+      repositories: '代码仓库'
     }
   },
   'en-US': {
@@ -214,13 +246,24 @@ const translations: Translations = {
       title: 'Jody Kwong',
       subtitle: 'Full-Stack Developer & Entrepreneur',
       description: 'Passionate about technology, focused on building great products and user experiences',
+      greeting: 'Hi, I\'m {name}.',
       getInTouch: 'Get in Touch',
       viewProjects: 'View Projects',
+      aboutMe: 'About Me',
       latestPosts: 'Latest Posts',
-      featuredProjects: 'Featured Projects'
+      featuredProjects: 'Featured Projects',
+      currentWork: '🚀 What I\'m Working On',
+      writingSharing: '✍️ Writing & Sharing',
+      experience: '💼 Experience',
+      fullProjectList: 'Full Project List',
+      openDashboard: 'Open Startup Dashboard',
+      readWriting: 'Read My Writing',
+      viewSoftware: 'View Software Projects'
     },
     about: {
       title: 'About Me',
+      subtitle: 'I\'m a full-stack developer and entrepreneur passionate about building products that solve real problems.',
+      background: 'Background',
       introduction: 'Introduction',
       skills: 'Skills',
       experience: 'Experience',
@@ -229,7 +272,14 @@ const translations: Translations = {
       technicalSkills: 'Technical Skills',
       softSkills: 'Soft Skills',
       languages: 'Languages',
-      hobbies: 'Hobbies'
+      hobbies: 'Hobbies',
+      frontend: 'Frontend Development',
+      backend: 'Backend Development',
+      devops: 'DevOps & Deployment',
+      other: 'Other Skills',
+      getInTouch: 'Get in Touch',
+      downloadResume: 'Download Resume',
+      currentFocus: 'Current Focus'
     },
     projects: {
       title: 'Projects',
@@ -266,7 +316,7 @@ const translations: Translations = {
       sharePost: 'Share Post',
       noPostsFound: 'No posts found',
       searchPlaceholder: 'Search posts by title, content, or tags...',
-      categories: {
+      categoryTypes: {
         tech: 'Technology',
         product: 'Product',
         startup: 'Startup',
@@ -332,6 +382,20 @@ const translations: Translations = {
         delete: 'Are you sure you want to delete this? This action cannot be undone.',
         unsaved: 'You have unsaved changes. Are you sure you want to leave?'
       }
+    },
+    software: {
+      title: 'On Software',
+      description: 'Sharing my thoughts, experiences, and best practices in software development.',
+      webDevelopment: 'Web Development',
+      backendDevelopment: 'Backend Development',
+      devopsDeployment: 'DevOps & Deployment'
+    },
+    open: {
+      title: 'Open Projects',
+      description: 'My open source project dashboard, showcasing ongoing projects and contributions.',
+      dashboard: 'Project Dashboard',
+      contributions: 'Contributions',
+      repositories: 'Repositories'
     }
   }
 };
@@ -387,25 +451,34 @@ export function initLanguage(): Language {
 }
 
 // 获取翻译文本
-export function t(key: string, language?: Language): string {
+export function t(key: string, language?: Language, params?: Record<string, string>): string {
   const lang = language || currentLanguage;
   const keys = key.split('.');
   let value: any = translations[lang];
-  
+
   for (const k of keys) {
     if (value && typeof value === 'object' && k in value) {
       value = value[k];
     } else {
       // 如果找不到翻译，尝试使用默认语言
       if (lang !== 'zh-CN') {
-        return t(key, 'zh-CN');
+        return t(key, 'zh-CN', params);
       }
       console.warn(`Translation not found for key: ${key}`);
       return key;
     }
   }
-  
-  return typeof value === 'string' ? value : key;
+
+  let result = typeof value === 'string' ? value : key;
+
+  // 替换参数
+  if (params) {
+    Object.keys(params).forEach(param => {
+      result = result.replace(`{${param}}`, params[param]);
+    });
+  }
+
+  return result;
 }
 
 // 获取所有支持的语言

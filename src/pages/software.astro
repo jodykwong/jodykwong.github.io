@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import GlassCard from '../components/GlassCard.astro';
 import GlassButton from '../components/GlassButton.astro';
+import { t, formatDate } from '../lib/i18n';
 
 const topics = [
   {
@@ -33,21 +34,15 @@ const topics = [
   }
 ];
 
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-}
+// 使用 i18n 的 formatDate 函数
 ---
 
-<Layout title="On Software | Your Name">
+<Layout title={`${t('software.title')} | ${t('home.title')}`}>
   <div class="max-w-4xl mx-auto">
     <!-- 页面标题 -->
     <GlassCard class="p-8 mb-8 text-center fade-in">
       <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
-        💻 On Software
+        💻 {t('software.title')}
       </h1>
       <p class="text-lg" style="color: var(--text-secondary);">
         Technical posts about software development, architecture decisions, and lessons learned

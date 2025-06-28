@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import GlassCard from '../components/GlassCard.astro';
 import GlassButton from '../components/GlassButton.astro';
 import { getProjects } from '../lib/supabase';
+import { t } from '../lib/i18n';
 
 export const prerender = false; // 确保动态渲染
 
@@ -12,9 +13,9 @@ const projects = await getProjects();
 // 状态映射函数
 function getStatusDisplay(status: string) {
   const statusMap = {
-    'active': 'Active',
-    'maintained': 'Maintained',
-    'archived': 'Archived'
+    'active': t('projects.status.active'),
+    'maintained': t('projects.status.maintained'),
+    'archived': t('projects.status.archived')
   };
   return statusMap[status as keyof typeof statusMap] || status;
 }
@@ -30,16 +31,15 @@ function getStatusStyle(status: string) {
 }
 ---
 
-<Layout title="Projects | Your Name">
+<Layout title={`${t('projects.title')} | ${t('home.title')}`}>
   <div class="max-w-4xl mx-auto">
     <!-- 页面标题 -->
     <GlassCard class="p-8 mb-8 text-center fade-in">
       <h1 class="text-4xl font-bold mb-4" style="color: var(--text-primary);">
-        🚀 Projects
+        🚀 {t('projects.title')}
       </h1>
       <p class="text-lg" style="color: var(--text-secondary);">
-        Here are some of the projects I've been working on. From SaaS products to open-source libraries,
-        I enjoy building things that solve real problems.
+        {t('projects.description')}
       </p>
     </GlassCard>
 
