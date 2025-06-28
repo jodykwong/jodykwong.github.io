@@ -81,28 +81,29 @@
 
     changeLanguage(language) {
       console.log('Changing language from', this.currentLanguage, 'to', language);
-      
+
       // 保存到localStorage
       localStorage.setItem('preferred-language', language);
-      
+
       // 更新HTML lang属性
       document.documentElement.lang = language;
-      
-      // 更新全局变量
+
+      // 更新全局变量和当前实例
       window.currentLanguage = language;
-      
-      // 触发语言变更事件
-      window.dispatchEvent(new CustomEvent('languageChanged', { 
-        detail: { language } 
+      this.currentLanguage = language;
+
+      // 触发语言变更事件（客户端翻译脚本会监听这个事件）
+      window.dispatchEvent(new CustomEvent('languageChanged', {
+        detail: { language }
       }));
-      
+
       // 关闭下拉菜单
       this.closeDropdown();
-      
-      // 重新加载页面以应用新语言
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
+
+      // 更新UI状态
+      this.updateUI();
+
+      console.log('Language changed successfully to:', language);
     }
 
     updateUI() {

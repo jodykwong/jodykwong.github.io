@@ -62,19 +62,22 @@ const defaultDescription = description || t('home.description');
     <script is:inline>
       // 初始化语言设置
       (function() {
+        // 获取客户端保存的语言偏好
         const savedLanguage = localStorage.getItem('preferred-language');
-        if (savedLanguage && (savedLanguage === 'zh-CN' || savedLanguage === 'en-US')) {
-          document.documentElement.lang = savedLanguage;
-          // 设置全局变量供其他脚本使用
-          window.currentLanguage = savedLanguage;
-        } else {
+        let clientLanguage = savedLanguage;
+
+        if (!clientLanguage || (clientLanguage !== 'zh-CN' && clientLanguage !== 'en-US')) {
           // 从浏览器语言检测
           const browserLang = navigator.language;
-          const language = browserLang.startsWith('zh') ? 'zh-CN' : 'en-US';
-          localStorage.setItem('preferred-language', language);
-          document.documentElement.lang = language;
-          window.currentLanguage = language;
+          clientLanguage = browserLang.startsWith('zh') ? 'zh-CN' : 'en-US';
+          localStorage.setItem('preferred-language', clientLanguage);
         }
+
+        // 更新HTML lang属性
+        document.documentElement.lang = clientLanguage;
+        window.currentLanguage = clientLanguage;
+
+        console.log('Language initialized:', clientLanguage);
 
         // 监听语言变更事件
         window.addEventListener('languageChanged', function(e) {
@@ -94,6 +97,9 @@ const defaultDescription = description || t('home.description');
       })();
     </script>
 
+    <!-- 客户端翻译脚本 -->
+    <script src="/scripts/client-i18n.js" is:inline></script>
+
     <!-- 语言切换功能脚本 -->
     <script src="/scripts/language-switch.js" is:inline></script>
   </head>
@@ -106,12 +112,12 @@ const defaultDescription = description || t('home.description');
           </a>
 
           <div class="hidden md:flex items-center space-x-6">
-            <a href="/" class="hover:text-primary transition-colors">{t('common.home')}</a>
-            <a href="/projects" class="hover:text-primary transition-colors">{t('common.projects')}</a>
-            <a href="/writing" class="hover:text-primary transition-colors">{t('common.writing')}</a>
-            <a href="/software" class="hover:text-primary transition-colors">{t('common.software')}</a>
-            <a href="/open" class="hover:text-primary transition-colors">{t('common.open')}</a>
-            <a href="/about" class="hover:text-primary transition-colors">{t('common.about')}</a>
+            <a href="/" class="hover:text-primary transition-colors" data-i18n="nav.home">首页</a>
+            <a href="/projects" class="hover:text-primary transition-colors" data-i18n="nav.projects">项目</a>
+            <a href="/writing" class="hover:text-primary transition-colors" data-i18n="nav.writing">写作</a>
+            <a href="/software" class="hover:text-primary transition-colors" data-i18n="nav.software">软件</a>
+            <a href="/open" class="hover:text-primary transition-colors" data-i18n="nav.open">仪表板</a>
+            <a href="/about" class="hover:text-primary transition-colors" data-i18n="nav.about">关于</a>
             <LanguageSwitch variant="toggle" showLabel={false} />
             <ThemeToggle />
           </div>
@@ -130,12 +136,12 @@ const defaultDescription = description || t('home.description');
 
         <div class="md:hidden mt-4 hidden glass" id="mobile-menu" style="border-radius: var(--radius-xl); padding: 16px; margin-top: 16px;">
           <div class="flex flex-col space-y-3">
-            <a href="/" class="hover:text-primary transition-colors py-2">{t('common.home')}</a>
-            <a href="/projects" class="hover:text-primary transition-colors py-2">{t('common.projects')}</a>
-            <a href="/writing" class="hover:text-primary transition-colors py-2">{t('common.writing')}</a>
-            <a href="/software" class="hover:text-primary transition-colors py-2">{t('common.software')}</a>
-            <a href="/open" class="hover:text-primary transition-colors py-2">{t('common.open')}</a>
-            <a href="/about" class="hover:text-primary transition-colors py-2">{t('common.about')}</a>
+            <a href="/" class="hover:text-primary transition-colors py-2" data-i18n="nav.home">首页</a>
+            <a href="/projects" class="hover:text-primary transition-colors py-2" data-i18n="nav.projects">项目</a>
+            <a href="/writing" class="hover:text-primary transition-colors py-2" data-i18n="nav.writing">写作</a>
+            <a href="/software" class="hover:text-primary transition-colors py-2" data-i18n="nav.software">软件</a>
+            <a href="/open" class="hover:text-primary transition-colors py-2" data-i18n="nav.open">仪表板</a>
+            <a href="/about" class="hover:text-primary transition-colors py-2" data-i18n="nav.about">关于</a>
           </div>
         </div>
       </nav>
